@@ -1,0 +1,22 @@
+{
+module TestLexer
+open System
+open Microsoft.FSharp.Text.Lexing
+
+let lexeme = LexBuffer<_>.LexemeString
+let print (id : string) (str : string) = Console.WriteLine(id + ":\t" + str)
+}
+
+let whitespace	= [' ' '\t']
+let op 			= "and" | "or" | "not"
+let letters		= ['A'-'Z']
+let symbol		= letters (letters | '_')+
+let openPar		= '('
+let closePar	= ')'
+
+rule tokenize = parse
+	| op { print "op" (lexeme lexbuf); tokenize lexbuf }
+	| symbol { print "symbol" (lexeme lexbuf); tokenize lexbuf }
+	| whitespace { print "" "space"; tokenize lexbuf }
+	| openPar | closePar { print "" (lexeme lexbuf); tokenize lexbuf }
+	| eof { printf "File end reached." }

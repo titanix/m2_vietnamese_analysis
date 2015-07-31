@@ -1,0 +1,23 @@
+%{
+open System
+%}
+
+%token <string> GRAPH	/* digraph | graph */
+%token LAYOUT_CMD		/* rankdir, shape */
+%token <string> NODE
+%token <string> LABEL		/* label des transitions */
+%token ARROW
+
+%token OPEN_ACC CLOSE_ACC OPEN_BRACKET CLOSE_BRACKET
+%token QUOTE EQUAL COMMA
+%token COMMENT_START
+%token EOF
+
+%start start
+%type <unit> start
+
+%%
+
+start:	/* empty */ { }
+	| start line { }
+%%
