@@ -44,14 +44,14 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AssemblyInfo.fs" />
-    <Compile Include="test.fs" />
-    <FsLex Include="test.fsl">
+    <FsLex Include="GraphLexer.fsl">
       <OtherFlags>--unicode</OtherFlags>
     </FsLex>
-	<FsYacc Include="GraphParser.fsy">
-		<OtherFlags>--module GraphParser</OtherFlags>
-	</FsYacc>
+    <FsYacc Include="GraphParser.fsy">
+      <OtherFlags>--module GraphParser</OtherFlags>
+    </FsYacc>
     <Compile Include="GraphParser.fs" />
+    <Compile Include="GraphLexer.fs" />
     <Compile Include="Program.fs" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\..\Microsoft SDKs\F#\3.1\Framework\v4.0\Microsoft.FSharp.Targets" />
