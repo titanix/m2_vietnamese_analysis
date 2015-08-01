@@ -3,13 +3,13 @@ open System
 
 %}
 
-%token <string> LAYOUT_CMD	/* rankdir, shape */
 %token <string> IDENTIFIER
 %token <string> QUOC_LETTER
 %token ARROW
 
+%token STRICT GRAPH DIGRAPH SUBGRAPH RANKDIR
 %token OPEN_ACC CLOSE_ACC OPEN_BRACKET CLOSE_BRACKET
-%token QUOTE EQUAL SEMI_COLON COMMA
+%token QUOTE EQUAL SEMI_COLON COMMA DOT
 %token COMMENT_START COMMENT_END
 %token NEW_LINE EOF
 
@@ -18,5 +18,6 @@ open System
 
 %%
 
-start:	/* empty */ { "test" }
+start:	/* empty */ 	{ "test" }
+
 %%

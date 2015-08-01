@@ -1,0 +1,72 @@
+{
+module GraphLexer
+
+open System
+open Microsoft.FSharp.Text.Lexing
+open GraphParser
+
+let lexeme = LexBuffer<_>.LexemeString
+
+let keyword_map =
+    [
+        "graph", GRAPH;
+        "digraph", DIGRAPH;
+        "strict", STRICT;
+        "subgraph", SUBGRAPH;
+        "rankdir", RANKDIR;
+    ]
+    |> Map.ofList
+
+
+let punctuation_map =
+    [
+        ".", DOT;
+        ",", COMMA;
+        "=", EQUAL;
+        ";", SEMI_COLON;
+        "{", OPEN_ACC;
+        "}", CLOSE_ACC;
+        "[", OPEN_BRACKET;
+        "]", CLOSE_BRACKET;
+    ]
+    |> Map.ofList
+
+}
+
+let whitespace	= [' ' '\t']
+let newline		= "\n\r" | '\n' | '\r'
+let char		= ['a'-'z' 'A'-'Z']
+let viet_letter	= ['a'-'e' 'g'-'i' 'k'-'v' 'y' 'z' 'đ' 'ơ' 'ư' 'ø' 'ê']
+let digit		= ['0'-'9']
+let comment		= "//"
+let arrow		= "->"
+let escape_start = '\\'
+let quote		= '"'
+let punctuation = '.' | ',' | '=' | ';' | '{' | '}' | '[' | ']'
+
+let identifier	= char(char|digit|['-' '_' '.'])*
+
+let layout_command = "splines" | "strict" | "graph" | "digraph" | "subgraph" | "rankdir"
+
+
+rule tokenize = parse
+	| whitespace				{ tokenize lexbuf }
+	| escape_start 'n'			{ tokenize lexbuf }		
+	// on échappe les \n des valeurs des labels
+	| newline					{ NEW_LINE }
+
+	| layout_command			{ match keyword_map.TryFind(lexeme lexbuf) with 
+                                      | Some(token) -> token
+                                      | _ -> IDENTIFIER(lexeme  lexbuf) }
+	| comment					{ COMMENT_START }
+
+	| identifier				{ IDENTIFIER(lexeme lexbuf) }
+	| viet_letter				{ QUOC_LETTER(lexeme lexbuf) }
+	| arrow						{ ARROW }
+
+	| quote						{ QUOTE }
+	| punctuation				{ match punctuation_map.TryFind(lexeme lexbuf) with 
+                                      | Some(token) -> token
+                                      | _ -> IDENTIFIER(lexeme  lexbuf) }
+
+	| eof 						{ EOF }

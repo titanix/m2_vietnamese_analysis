@@ -29,12 +29,23 @@ open Microsoft.FSharp.Text
 open Microsoft.FSharp.Text.Lexing
 open GraphLexer
 
-let test =
-    use stream_reader = new StreamReader ("/Users/Louis/Code/VietPhon/graph.dot")
+let tokenize (path:string) =
+    use stream_reader = new StreamReader (path)
     let lexbuf = Lexing.LexBuffer<_>.FromTextReader (stream_reader)
-    while true do
+    let mutable loop = true
+    while loop do
         try
             printf "%A\n" (GraphLexer.tokenize lexbuf)
         with
-            | ex -> Environment.Exit 1
+            | ex -> loop <- false ; ()
 
+let parse (path:string) =
+    use stream_reader = new StreamReader (path)
+    let lexbuf = Lexing.LexBuffer<_>.FromTextReader (stream_reader)
+    printf "Start Parsing...\n"
+    GraphParser.start GraphLexer.tokenize lexbuf
+
+[<EntryPoint>]
+let main argv = 
+    let lol = tokenize "/Users/Louis/Code/VietPhon/graph.dot"
+    0
