@@ -6,15 +6,23 @@ open Microsoft.FSharp.Text.Parsing.ParseHelpers
 # 1 "GraphParser.fsy"
 
 open System
+open System.Diagnostics
+open System.Collections.Generic
 
+let log (x:string) = Debug.WriteLine ("call to rule\t" + x)
 
-# 11 "GraphParser.fs"
+let mutable transition_table: (string * string * char) list option = None
+let tr_table = new List<string * string * char>()
+
+# 17 "GraphParser.fs"
 // This type is the type of tokens accepted by the parser
 type token = 
+  | DEBUG of (string)
   | NEW_LINE
   | EOF
-  | COMMENT_START
-  | COMMENT_END
+  | COMMENT of (string)
+  | LABEL
+  | COLOR
   | QUOTE
   | EQUAL
   | SEMI_COLON
@@ -34,10 +42,12 @@ type token =
   | IDENTIFIER of (string)
 // This type is used to give symbolic names to token indexes, useful for error messages
 type tokenId = 
+    | TOKEN_DEBUG
     | TOKEN_NEW_LINE
     | TOKEN_EOF
-    | TOKEN_COMMENT_START
-    | TOKEN_COMMENT_END
+    | TOKEN_COMMENT
+    | TOKEN_LABEL
+    | TOKEN_COLOR
     | TOKEN_QUOTE
     | TOKEN_EQUAL
     | TOKEN_SEMI_COLON
@@ -61,58 +71,72 @@ type tokenId =
 type nonTerminalId = 
     | NONTERM__startstart
     | NONTERM_start
+    | NONTERM_graph_def
+    | NONTERM_transition
+    | NONTERM_node
+    | NONTERM_attributes
+    | NONTERM_attribute_content
+    | NONTERM_label_content
+    | NONTERM_label_value
+    | NONTERM_color_content
+    | NONTERM_node_group
+    | NONTERM_node_group_content
 
 // This function maps tokens to integer indexes
 let tagOfToken (t:token) = 
   match t with
-  | NEW_LINE  -> 0 
-  | EOF  -> 1 
-  | COMMENT_START  -> 2 
-  | COMMENT_END  -> 3 
-  | QUOTE  -> 4 
-  | EQUAL  -> 5 
-  | SEMI_COLON  -> 6 
-  | COMMA  -> 7 
-  | DOT  -> 8 
-  | OPEN_ACC  -> 9 
-  | CLOSE_ACC  -> 10 
-  | OPEN_BRACKET  -> 11 
-  | CLOSE_BRACKET  -> 12 
-  | STRICT  -> 13 
-  | GRAPH  -> 14 
-  | DIGRAPH  -> 15 
-  | SUBGRAPH  -> 16 
-  | RANKDIR  -> 17 
-  | ARROW  -> 18 
-  | QUOC_LETTER _ -> 19 
-  | IDENTIFIER _ -> 20 
+  | DEBUG _ -> 0 
+  | NEW_LINE  -> 1 
+  | EOF  -> 2 
+  | COMMENT _ -> 3 
+  | LABEL  -> 4 
+  | COLOR  -> 5 
+  | QUOTE  -> 6 
+  | EQUAL  -> 7 
+  | SEMI_COLON  -> 8 
+  | COMMA  -> 9 
+  | DOT  -> 10 
+  | OPEN_ACC  -> 11 
+  | CLOSE_ACC  -> 12 
+  | OPEN_BRACKET  -> 13 
+  | CLOSE_BRACKET  -> 14 
+  | STRICT  -> 15 
+  | GRAPH  -> 16 
+  | DIGRAPH  -> 17 
+  | SUBGRAPH  -> 18 
+  | RANKDIR  -> 19 
+  | ARROW  -> 20 
+  | QUOC_LETTER _ -> 21 
+  | IDENTIFIER _ -> 22 
 
 // This function maps integer indexes to symbolic token ids
 let tokenTagToTokenId (tokenIdx:int) = 
   match tokenIdx with
-  | 0 -> TOKEN_NEW_LINE 
-  | 1 -> TOKEN_EOF 
-  | 2 -> TOKEN_COMMENT_START 
-  | 3 -> TOKEN_COMMENT_END 
-  | 4 -> TOKEN_QUOTE 
-  | 5 -> TOKEN_EQUAL 
-  | 6 -> TOKEN_SEMI_COLON 
-  | 7 -> TOKEN_COMMA 
-  | 8 -> TOKEN_DOT 
-  | 9 -> TOKEN_OPEN_ACC 
-  | 10 -> TOKEN_CLOSE_ACC 
-  | 11 -> TOKEN_OPEN_BRACKET 
-  | 12 -> TOKEN_CLOSE_BRACKET 
-  | 13 -> TOKEN_STRICT 
-  | 14 -> TOKEN_GRAPH 
-  | 15 -> TOKEN_DIGRAPH 
-  | 16 -> TOKEN_SUBGRAPH 
-  | 17 -> TOKEN_RANKDIR 
-  | 18 -> TOKEN_ARROW 
-  | 19 -> TOKEN_QUOC_LETTER 
-  | 20 -> TOKEN_IDENTIFIER 
-  | 23 -> TOKEN_end_of_input
-  | 21 -> TOKEN_error
+  | 0 -> TOKEN_DEBUG 
+  | 1 -> TOKEN_NEW_LINE 
+  | 2 -> TOKEN_EOF 
+  | 3 -> TOKEN_COMMENT 
+  | 4 -> TOKEN_LABEL 
+  | 5 -> TOKEN_COLOR 
+  | 6 -> TOKEN_QUOTE 
+  | 7 -> TOKEN_EQUAL 
+  | 8 -> TOKEN_SEMI_COLON 
+  | 9 -> TOKEN_COMMA 
+  | 10 -> TOKEN_DOT 
+  | 11 -> TOKEN_OPEN_ACC 
+  | 12 -> TOKEN_CLOSE_ACC 
+  | 13 -> TOKEN_OPEN_BRACKET 
+  | 14 -> TOKEN_CLOSE_BRACKET 
+  | 15 -> TOKEN_STRICT 
+  | 16 -> TOKEN_GRAPH 
+  | 17 -> TOKEN_DIGRAPH 
+  | 18 -> TOKEN_SUBGRAPH 
+  | 19 -> TOKEN_RANKDIR 
+  | 20 -> TOKEN_ARROW 
+  | 21 -> TOKEN_QUOC_LETTER 
+  | 22 -> TOKEN_IDENTIFIER 
+  | 25 -> TOKEN_end_of_input
+  | 23 -> TOKEN_error
   | _ -> failwith "tokenTagToTokenId: bad token"
 
 /// This function maps production indexes returned in syntax errors to strings representing the non terminal that would be produced by that production
@@ -120,18 +144,45 @@ let prodIdxToNonTerminal (prodIdx:int) =
   match prodIdx with
     | 0 -> NONTERM__startstart 
     | 1 -> NONTERM_start 
+    | 2 -> NONTERM_start 
+    | 3 -> NONTERM_start 
+    | 4 -> NONTERM_start 
+    | 5 -> NONTERM_graph_def 
+    | 6 -> NONTERM_graph_def 
+    | 7 -> NONTERM_graph_def 
+    | 8 -> NONTERM_graph_def 
+    | 9 -> NONTERM_graph_def 
+    | 10 -> NONTERM_graph_def 
+    | 11 -> NONTERM_transition 
+    | 12 -> NONTERM_transition 
+    | 13 -> NONTERM_node 
+    | 14 -> NONTERM_node 
+    | 15 -> NONTERM_attributes 
+    | 16 -> NONTERM_attribute_content 
+    | 17 -> NONTERM_attribute_content 
+    | 18 -> NONTERM_attribute_content 
+    | 19 -> NONTERM_attribute_content 
+    | 20 -> NONTERM_label_content 
+    | 21 -> NONTERM_label_value 
+    | 22 -> NONTERM_label_value 
+    | 23 -> NONTERM_color_content 
+    | 24 -> NONTERM_node_group 
+    | 25 -> NONTERM_node_group_content 
+    | 26 -> NONTERM_node_group_content 
     | _ -> failwith "prodIdxToNonTerminal: bad production index"
 
-let _fsyacc_endOfInputTag = 23 
-let _fsyacc_tagOfErrorTerminal = 21
+let _fsyacc_endOfInputTag = 25 
+let _fsyacc_tagOfErrorTerminal = 23
 
 // This function gets the name of a token as a string
 let token_to_string (t:token) = 
   match t with 
+  | DEBUG _ -> "DEBUG" 
   | NEW_LINE  -> "NEW_LINE" 
   | EOF  -> "EOF" 
-  | COMMENT_START  -> "COMMENT_START" 
-  | COMMENT_END  -> "COMMENT_END" 
+  | COMMENT _ -> "COMMENT" 
+  | LABEL  -> "LABEL" 
+  | COLOR  -> "COLOR" 
   | QUOTE  -> "QUOTE" 
   | EQUAL  -> "EQUAL" 
   | SEMI_COLON  -> "SEMI_COLON" 
@@ -153,10 +204,12 @@ let token_to_string (t:token) =
 // This function gets the data carried by a token as an object
 let _fsyacc_dataOfToken (t:token) = 
   match t with 
+  | DEBUG _fsyacc_x -> Microsoft.FSharp.Core.Operators.box _fsyacc_x 
   | NEW_LINE  -> (null : System.Object) 
   | EOF  -> (null : System.Object) 
-  | COMMENT_START  -> (null : System.Object) 
-  | COMMENT_END  -> (null : System.Object) 
+  | COMMENT _fsyacc_x -> Microsoft.FSharp.Core.Operators.box _fsyacc_x 
+  | LABEL  -> (null : System.Object) 
+  | COLOR  -> (null : System.Object) 
   | QUOTE  -> (null : System.Object) 
   | EQUAL  -> (null : System.Object) 
   | SEMI_COLON  -> (null : System.Object) 
@@ -174,18 +227,18 @@ let _fsyacc_dataOfToken (t:token) =
   | ARROW  -> (null : System.Object) 
   | QUOC_LETTER _fsyacc_x -> Microsoft.FSharp.Core.Operators.box _fsyacc_x 
   | IDENTIFIER _fsyacc_x -> Microsoft.FSharp.Core.Operators.box _fsyacc_x 
-let _fsyacc_gotos = [| 0us; 65535us; 1us; 65535us; 0us; 1us; |]
-let _fsyacc_sparseGotoTableRowOffsets = [|0us; 1us; |]
-let _fsyacc_stateToProdIdxsTableElements = [| 1us; 0us; 1us; 0us; |]
-let _fsyacc_stateToProdIdxsTableRowOffsets = [|0us; 2us; |]
-let _fsyacc_action_rows = 2
-let _fsyacc_actionTableElements = [|0us; 16385us; 0us; 49152us; |]
-let _fsyacc_actionTableRowOffsets = [|0us; 1us; |]
-let _fsyacc_reductionSymbolCounts = [|1us; 0us; |]
-let _fsyacc_productionToNonTerminalTable = [|0us; 1us; |]
-let _fsyacc_immediateActions = [|65535us; 49152us; |]
+let _fsyacc_gotos = [| 0us; 65535us; 1us; 65535us; 0us; 1us; 6us; 65535us; 3us; 4us; 9us; 10us; 13us; 14us; 16us; 17us; 18us; 19us; 20us; 21us; 6us; 65535us; 3us; 13us; 9us; 13us; 13us; 13us; 16us; 13us; 18us; 13us; 20us; 13us; 10us; 65535us; 3us; 15us; 9us; 15us; 13us; 15us; 16us; 15us; 18us; 15us; 20us; 15us; 22us; 23us; 27us; 28us; 57us; 60us; 60us; 60us; 2us; 65535us; 23us; 24us; 28us; 29us; 3us; 65535us; 35us; 36us; 40us; 41us; 42us; 43us; 3us; 65535us; 35us; 38us; 40us; 38us; 42us; 38us; 2us; 65535us; 46us; 47us; 50us; 51us; 3us; 65535us; 35us; 39us; 40us; 39us; 42us; 39us; 6us; 65535us; 3us; 26us; 9us; 26us; 13us; 26us; 16us; 26us; 18us; 26us; 20us; 26us; 2us; 65535us; 57us; 58us; 60us; 61us; |]
+let _fsyacc_sparseGotoTableRowOffsets = [|0us; 1us; 3us; 10us; 17us; 28us; 31us; 35us; 39us; 42us; 46us; 53us; |]
+let _fsyacc_stateToProdIdxsTableElements = [| 1us; 0us; 1us; 0us; 2us; 2us; 3us; 2us; 2us; 3us; 2us; 2us; 3us; 2us; 2us; 3us; 1us; 3us; 1us; 4us; 1us; 4us; 1us; 4us; 1us; 4us; 1us; 4us; 1us; 4us; 2us; 5us; 6us; 1us; 6us; 2us; 7us; 11us; 1us; 7us; 1us; 7us; 1us; 8us; 1us; 8us; 1us; 9us; 1us; 9us; 1us; 11us; 1us; 11us; 1us; 11us; 1us; 11us; 1us; 12us; 1us; 12us; 1us; 12us; 1us; 12us; 1us; 12us; 1us; 13us; 1us; 14us; 1us; 14us; 1us; 14us; 1us; 15us; 1us; 15us; 1us; 15us; 2us; 16us; 18us; 2us; 17us; 19us; 1us; 18us; 1us; 18us; 1us; 19us; 1us; 19us; 1us; 20us; 1us; 20us; 1us; 20us; 1us; 20us; 1us; 20us; 2us; 21us; 22us; 1us; 22us; 1us; 22us; 1us; 23us; 1us; 23us; 1us; 23us; 1us; 23us; 1us; 23us; 1us; 24us; 1us; 24us; 1us; 24us; 2us; 25us; 26us; 1us; 26us; |]
+let _fsyacc_stateToProdIdxsTableRowOffsets = [|0us; 2us; 4us; 7us; 10us; 13us; 16us; 18us; 20us; 22us; 24us; 26us; 28us; 30us; 33us; 35us; 38us; 40us; 42us; 44us; 46us; 48us; 50us; 52us; 54us; 56us; 58us; 60us; 62us; 64us; 66us; 68us; 70us; 72us; 74us; 76us; 78us; 80us; 82us; 85us; 88us; 90us; 92us; 94us; 96us; 98us; 100us; 102us; 104us; 106us; 109us; 111us; 113us; 115us; 117us; 119us; 121us; 123us; 125us; 127us; 129us; 132us; |]
+let _fsyacc_action_rows = 62
+let _fsyacc_actionTableElements = [|2us; 16385us; 15us; 7us; 17us; 2us; 0us; 49152us; 1us; 32768us; 11us; 3us; 5us; 16394us; 1us; 18us; 3us; 20us; 6us; 32us; 11us; 57us; 22us; 31us; 1us; 32768us; 12us; 5us; 1us; 16386us; 2us; 6us; 0us; 16387us; 1us; 32768us; 17us; 8us; 1us; 32768us; 11us; 9us; 5us; 16394us; 1us; 18us; 3us; 20us; 6us; 32us; 11us; 57us; 22us; 31us; 1us; 32768us; 12us; 11us; 1us; 32768us; 2us; 12us; 0us; 16388us; 5us; 16389us; 1us; 18us; 3us; 20us; 6us; 32us; 11us; 57us; 22us; 31us; 0us; 16390us; 2us; 32768us; 8us; 16us; 20us; 22us; 5us; 16394us; 1us; 18us; 3us; 20us; 6us; 32us; 11us; 57us; 22us; 31us; 0us; 16391us; 5us; 16394us; 1us; 18us; 3us; 20us; 6us; 32us; 11us; 57us; 22us; 31us; 0us; 16392us; 5us; 16394us; 1us; 18us; 3us; 20us; 6us; 32us; 11us; 57us; 22us; 31us; 0us; 16393us; 2us; 32768us; 6us; 32us; 22us; 31us; 1us; 32768us; 13us; 35us; 1us; 32768us; 8us; 25us; 0us; 16395us; 1us; 32768us; 20us; 27us; 2us; 32768us; 6us; 32us; 22us; 31us; 1us; 32768us; 13us; 35us; 1us; 32768us; 8us; 30us; 0us; 16396us; 0us; 16397us; 1us; 32768us; 22us; 33us; 1us; 32768us; 6us; 34us; 0us; 16398us; 2us; 32768us; 4us; 44us; 5us; 52us; 1us; 32768us; 14us; 37us; 0us; 16399us; 1us; 16400us; 9us; 40us; 1us; 16401us; 9us; 42us; 2us; 32768us; 4us; 44us; 5us; 52us; 0us; 16402us; 2us; 32768us; 4us; 44us; 5us; 52us; 0us; 16403us; 1us; 32768us; 7us; 45us; 1us; 32768us; 6us; 46us; 1us; 32768us; 21us; 49us; 1us; 32768us; 6us; 48us; 0us; 16404us; 1us; 16405us; 9us; 50us; 1us; 32768us; 21us; 49us; 0us; 16406us; 1us; 32768us; 7us; 53us; 1us; 32768us; 6us; 54us; 1us; 32768us; 22us; 55us; 1us; 32768us; 6us; 56us; 0us; 16407us; 2us; 32768us; 6us; 32us; 22us; 31us; 1us; 32768us; 12us; 59us; 0us; 16408us; 2us; 16409us; 6us; 32us; 22us; 31us; 0us; 16410us; |]
+let _fsyacc_actionTableRowOffsets = [|0us; 3us; 4us; 6us; 12us; 14us; 16us; 17us; 19us; 21us; 27us; 29us; 31us; 32us; 38us; 39us; 42us; 48us; 49us; 55us; 56us; 62us; 63us; 66us; 68us; 70us; 71us; 73us; 76us; 78us; 80us; 81us; 82us; 84us; 86us; 87us; 90us; 92us; 93us; 95us; 97us; 100us; 101us; 104us; 105us; 107us; 109us; 111us; 113us; 114us; 116us; 118us; 119us; 121us; 123us; 125us; 127us; 128us; 131us; 133us; 134us; 137us; |]
+let _fsyacc_reductionSymbolCounts = [|1us; 0us; 4us; 5us; 6us; 1us; 2us; 3us; 2us; 2us; 0us; 5us; 5us; 1us; 3us; 3us; 1us; 1us; 3us; 3us; 5us; 1us; 3us; 5us; 3us; 1us; 2us; |]
+let _fsyacc_productionToNonTerminalTable = [|0us; 1us; 1us; 1us; 1us; 2us; 2us; 2us; 2us; 2us; 2us; 3us; 3us; 4us; 4us; 5us; 6us; 6us; 6us; 6us; 7us; 8us; 8us; 9us; 10us; 11us; 11us; |]
+let _fsyacc_immediateActions = [|65535us; 49152us; 65535us; 65535us; 65535us; 65535us; 16387us; 65535us; 65535us; 65535us; 65535us; 65535us; 16388us; 65535us; 16390us; 65535us; 65535us; 16391us; 65535us; 16392us; 65535us; 16393us; 65535us; 65535us; 65535us; 16395us; 65535us; 65535us; 65535us; 65535us; 16396us; 16397us; 65535us; 65535us; 16398us; 65535us; 65535us; 16399us; 65535us; 65535us; 65535us; 16402us; 65535us; 16403us; 65535us; 65535us; 65535us; 65535us; 16404us; 65535us; 65535us; 16406us; 65535us; 65535us; 65535us; 65535us; 16407us; 65535us; 65535us; 16408us; 65535us; 16410us; |]
 let _fsyacc_reductions ()  =    [| 
-# 188 "GraphParser.fs"
+# 241 "GraphParser.fs"
         (fun (parseState : Microsoft.FSharp.Text.Parsing.IParseState) ->
             let _1 = (let data = parseState.GetInput(1) in (Microsoft.FSharp.Core.Operators.unbox data : string)) in
             Microsoft.FSharp.Core.Operators.box
@@ -194,18 +247,305 @@ let _fsyacc_reductions ()  =    [|
                       raise (Microsoft.FSharp.Text.Parsing.Accept(Microsoft.FSharp.Core.Operators.box _1))
                    )
                  : '_startstart));
-# 197 "GraphParser.fs"
+# 250 "GraphParser.fs"
         (fun (parseState : Microsoft.FSharp.Text.Parsing.IParseState) ->
             Microsoft.FSharp.Core.Operators.box
                 (
                    (
-# 21 "GraphParser.fsy"
-                                           "test" 
+# 30 "GraphParser.fsy"
+                                                   log "empty" ; "test" 
                    )
-# 21 "GraphParser.fsy"
+# 30 "GraphParser.fsy"
                  : string));
+# 260 "GraphParser.fs"
+        (fun (parseState : Microsoft.FSharp.Text.Parsing.IParseState) ->
+            let _3 = (let data = parseState.GetInput(3) in (Microsoft.FSharp.Core.Operators.unbox data : 'graph_def)) in
+            Microsoft.FSharp.Core.Operators.box
+                (
+                   (
+# 31 "GraphParser.fsy"
+                                                                  log "start 0" ; "" 
+                   )
+# 31 "GraphParser.fsy"
+                 : string));
+# 271 "GraphParser.fs"
+        (fun (parseState : Microsoft.FSharp.Text.Parsing.IParseState) ->
+            let _3 = (let data = parseState.GetInput(3) in (Microsoft.FSharp.Core.Operators.unbox data : 'graph_def)) in
+            Microsoft.FSharp.Core.Operators.box
+                (
+                   (
+# 32 "GraphParser.fsy"
+                                                                     log "start 1" ; "" 
+                   )
+# 32 "GraphParser.fsy"
+                 : string));
+# 282 "GraphParser.fs"
+        (fun (parseState : Microsoft.FSharp.Text.Parsing.IParseState) ->
+            let _4 = (let data = parseState.GetInput(4) in (Microsoft.FSharp.Core.Operators.unbox data : 'graph_def)) in
+            Microsoft.FSharp.Core.Operators.box
+                (
+                   (
+# 33 "GraphParser.fsy"
+                                                                          log "start 2" ; "pwet" 
+                   )
+# 33 "GraphParser.fsy"
+                 : string));
+# 293 "GraphParser.fs"
+        (fun (parseState : Microsoft.FSharp.Text.Parsing.IParseState) ->
+            let _1 = (let data = parseState.GetInput(1) in (Microsoft.FSharp.Core.Operators.unbox data : 'transition)) in
+            Microsoft.FSharp.Core.Operators.box
+                (
+                   (
+# 36 "GraphParser.fsy"
+                                             log "g1" 
+                   )
+# 36 "GraphParser.fsy"
+                 : 'graph_def));
+# 304 "GraphParser.fs"
+        (fun (parseState : Microsoft.FSharp.Text.Parsing.IParseState) ->
+            let _1 = (let data = parseState.GetInput(1) in (Microsoft.FSharp.Core.Operators.unbox data : 'transition)) in
+            let _2 = (let data = parseState.GetInput(2) in (Microsoft.FSharp.Core.Operators.unbox data : 'graph_def)) in
+            Microsoft.FSharp.Core.Operators.box
+                (
+                   (
+# 37 "GraphParser.fsy"
+                                                      log "g2" 
+                   )
+# 37 "GraphParser.fsy"
+                 : 'graph_def));
+# 316 "GraphParser.fs"
+        (fun (parseState : Microsoft.FSharp.Text.Parsing.IParseState) ->
+            let _1 = (let data = parseState.GetInput(1) in (Microsoft.FSharp.Core.Operators.unbox data : 'node)) in
+            let _3 = (let data = parseState.GetInput(3) in (Microsoft.FSharp.Core.Operators.unbox data : 'graph_def)) in
+            Microsoft.FSharp.Core.Operators.box
+                (
+                   (
+# 38 "GraphParser.fsy"
+                                                          log "gNode" 
+                   )
+# 38 "GraphParser.fsy"
+                 : 'graph_def));
+# 328 "GraphParser.fs"
+        (fun (parseState : Microsoft.FSharp.Text.Parsing.IParseState) ->
+            let _2 = (let data = parseState.GetInput(2) in (Microsoft.FSharp.Core.Operators.unbox data : 'graph_def)) in
+            Microsoft.FSharp.Core.Operators.box
+                (
+                   (
+# 39 "GraphParser.fsy"
+                                                    log "gNL"
+                   )
+# 39 "GraphParser.fsy"
+                 : 'graph_def));
+# 339 "GraphParser.fs"
+        (fun (parseState : Microsoft.FSharp.Text.Parsing.IParseState) ->
+            let _1 = (let data = parseState.GetInput(1) in (Microsoft.FSharp.Core.Operators.unbox data : string)) in
+            let _2 = (let data = parseState.GetInput(2) in (Microsoft.FSharp.Core.Operators.unbox data : 'graph_def)) in
+            Microsoft.FSharp.Core.Operators.box
+                (
+                   (
+# 40 "GraphParser.fsy"
+                                                    log "gCOM" 
+                   )
+# 40 "GraphParser.fsy"
+                 : 'graph_def));
+# 351 "GraphParser.fs"
+        (fun (parseState : Microsoft.FSharp.Text.Parsing.IParseState) ->
+            Microsoft.FSharp.Core.Operators.box
+                (
+                   (
+# 42 "GraphParser.fsy"
+                                      log "gEmpty" 
+                   )
+# 42 "GraphParser.fsy"
+                 : 'graph_def));
+# 361 "GraphParser.fs"
+        (fun (parseState : Microsoft.FSharp.Text.Parsing.IParseState) ->
+            let _1 = (let data = parseState.GetInput(1) in (Microsoft.FSharp.Core.Operators.unbox data : 'node)) in
+            let _3 = (let data = parseState.GetInput(3) in (Microsoft.FSharp.Core.Operators.unbox data : 'node)) in
+            let _4 = (let data = parseState.GetInput(4) in (Microsoft.FSharp.Core.Operators.unbox data : 'attributes)) in
+            Microsoft.FSharp.Core.Operators.box
+                (
+                   (
+# 45 "GraphParser.fsy"
+                                                                 log "t1" ; 
+                             List.map (fun c -> tr_table.Add((_1, _3, c))) _4 ; ()
+                   )
+# 45 "GraphParser.fsy"
+                 : 'transition));
+# 375 "GraphParser.fs"
+        (fun (parseState : Microsoft.FSharp.Text.Parsing.IParseState) ->
+            let _1 = (let data = parseState.GetInput(1) in (Microsoft.FSharp.Core.Operators.unbox data : 'node_group)) in
+            let _3 = (let data = parseState.GetInput(3) in (Microsoft.FSharp.Core.Operators.unbox data : 'node)) in
+            let _4 = (let data = parseState.GetInput(4) in (Microsoft.FSharp.Core.Operators.unbox data : 'attributes)) in
+            Microsoft.FSharp.Core.Operators.box
+                (
+                   (
+# 47 "GraphParser.fsy"
+                                                                       log "t2" ;
+                             List.map (fun n -> List.map (fun c -> tr_table.Add((n, _3, c))) _4) _1 ; () 
+                   )
+# 47 "GraphParser.fsy"
+                 : 'transition));
+# 389 "GraphParser.fs"
+        (fun (parseState : Microsoft.FSharp.Text.Parsing.IParseState) ->
+            let _1 = (let data = parseState.GetInput(1) in (Microsoft.FSharp.Core.Operators.unbox data : string)) in
+            Microsoft.FSharp.Core.Operators.box
+                (
+                   (
+# 51 "GraphParser.fsy"
+                                             log ("i1: " + _1) ; _1 
+                   )
+# 51 "GraphParser.fsy"
+                 : 'node));
+# 400 "GraphParser.fs"
+        (fun (parseState : Microsoft.FSharp.Text.Parsing.IParseState) ->
+            let _2 = (let data = parseState.GetInput(2) in (Microsoft.FSharp.Core.Operators.unbox data : string)) in
+            Microsoft.FSharp.Core.Operators.box
+                (
+                   (
+# 52 "GraphParser.fsy"
+                                                       log ("iQuote: " + _2) ; _2 
+                   )
+# 52 "GraphParser.fsy"
+                 : 'node));
+# 411 "GraphParser.fs"
+        (fun (parseState : Microsoft.FSharp.Text.Parsing.IParseState) ->
+            let _2 = (let data = parseState.GetInput(2) in (Microsoft.FSharp.Core.Operators.unbox data : 'attribute_content)) in
+            Microsoft.FSharp.Core.Operators.box
+                (
+                   (
+# 55 "GraphParser.fsy"
+                                                                        log "attr1" ; _2 
+                   )
+# 55 "GraphParser.fsy"
+                 : 'attributes));
+# 422 "GraphParser.fs"
+        (fun (parseState : Microsoft.FSharp.Text.Parsing.IParseState) ->
+            let _1 = (let data = parseState.GetInput(1) in (Microsoft.FSharp.Core.Operators.unbox data : 'label_content)) in
+            Microsoft.FSharp.Core.Operators.box
+                (
+                   (
+# 58 "GraphParser.fsy"
+                                               log "attr_c1" ; _1 
+                   )
+# 58 "GraphParser.fsy"
+                 : 'attribute_content));
+# 433 "GraphParser.fs"
+        (fun (parseState : Microsoft.FSharp.Text.Parsing.IParseState) ->
+            let _1 = (let data = parseState.GetInput(1) in (Microsoft.FSharp.Core.Operators.unbox data : 'color_content)) in
+            Microsoft.FSharp.Core.Operators.box
+                (
+                   (
+# 59 "GraphParser.fsy"
+                                                 log "attr_c2" ; [] 
+                   )
+# 59 "GraphParser.fsy"
+                 : 'attribute_content));
+# 444 "GraphParser.fs"
+        (fun (parseState : Microsoft.FSharp.Text.Parsing.IParseState) ->
+            let _1 = (let data = parseState.GetInput(1) in (Microsoft.FSharp.Core.Operators.unbox data : 'label_content)) in
+            let _3 = (let data = parseState.GetInput(3) in (Microsoft.FSharp.Core.Operators.unbox data : 'attribute_content)) in
+            Microsoft.FSharp.Core.Operators.box
+                (
+                   (
+# 60 "GraphParser.fsy"
+                                                                   log "attr_c3" ; _1 
+                   )
+# 60 "GraphParser.fsy"
+                 : 'attribute_content));
+# 456 "GraphParser.fs"
+        (fun (parseState : Microsoft.FSharp.Text.Parsing.IParseState) ->
+            let _1 = (let data = parseState.GetInput(1) in (Microsoft.FSharp.Core.Operators.unbox data : 'color_content)) in
+            let _3 = (let data = parseState.GetInput(3) in (Microsoft.FSharp.Core.Operators.unbox data : 'attribute_content)) in
+            Microsoft.FSharp.Core.Operators.box
+                (
+                   (
+# 61 "GraphParser.fsy"
+                                                                   log "attr_c4" ; _3 
+                   )
+# 61 "GraphParser.fsy"
+                 : 'attribute_content));
+# 468 "GraphParser.fs"
+        (fun (parseState : Microsoft.FSharp.Text.Parsing.IParseState) ->
+            let _4 = (let data = parseState.GetInput(4) in (Microsoft.FSharp.Core.Operators.unbox data : 'label_value)) in
+            Microsoft.FSharp.Core.Operators.box
+                (
+                   (
+# 64 "GraphParser.fsy"
+                                                                log "label_content"  ; _4 
+                   )
+# 64 "GraphParser.fsy"
+                 : 'label_content));
+# 479 "GraphParser.fs"
+        (fun (parseState : Microsoft.FSharp.Text.Parsing.IParseState) ->
+            let _1 = (let data = parseState.GetInput(1) in (Microsoft.FSharp.Core.Operators.unbox data : string)) in
+            Microsoft.FSharp.Core.Operators.box
+                (
+                   (
+# 67 "GraphParser.fsy"
+                                              log "quoc1" ; [_1.[0]] 
+                   )
+# 67 "GraphParser.fsy"
+                 : 'label_value));
+# 490 "GraphParser.fs"
+        (fun (parseState : Microsoft.FSharp.Text.Parsing.IParseState) ->
+            let _1 = (let data = parseState.GetInput(1) in (Microsoft.FSharp.Core.Operators.unbox data : string)) in
+            let _3 = (let data = parseState.GetInput(3) in (Microsoft.FSharp.Core.Operators.unbox data : 'label_value)) in
+            Microsoft.FSharp.Core.Operators.box
+                (
+                   (
+# 68 "GraphParser.fsy"
+                                                             log "quoc2" ; _1.[0] :: _3 
+                   )
+# 68 "GraphParser.fsy"
+                 : 'label_value));
+# 502 "GraphParser.fs"
+        (fun (parseState : Microsoft.FSharp.Text.Parsing.IParseState) ->
+            let _4 = (let data = parseState.GetInput(4) in (Microsoft.FSharp.Core.Operators.unbox data : string)) in
+            Microsoft.FSharp.Core.Operators.box
+                (
+                   (
+# 71 "GraphParser.fsy"
+                                                               log "color_content" 
+                   )
+# 71 "GraphParser.fsy"
+                 : 'color_content));
+# 513 "GraphParser.fs"
+        (fun (parseState : Microsoft.FSharp.Text.Parsing.IParseState) ->
+            let _2 = (let data = parseState.GetInput(2) in (Microsoft.FSharp.Core.Operators.unbox data : 'node_group_content)) in
+            Microsoft.FSharp.Core.Operators.box
+                (
+                   (
+# 74 "GraphParser.fsy"
+                                                                 log "node_group1" ; _2 
+                   )
+# 74 "GraphParser.fsy"
+                 : 'node_group));
+# 524 "GraphParser.fs"
+        (fun (parseState : Microsoft.FSharp.Text.Parsing.IParseState) ->
+            let _1 = (let data = parseState.GetInput(1) in (Microsoft.FSharp.Core.Operators.unbox data : 'node)) in
+            Microsoft.FSharp.Core.Operators.box
+                (
+                   (
+# 77 "GraphParser.fsy"
+                                        log "n_grp_c1" ; [_1] 
+                   )
+# 77 "GraphParser.fsy"
+                 : 'node_group_content));
+# 535 "GraphParser.fs"
+        (fun (parseState : Microsoft.FSharp.Text.Parsing.IParseState) ->
+            let _1 = (let data = parseState.GetInput(1) in (Microsoft.FSharp.Core.Operators.unbox data : 'node)) in
+            let _2 = (let data = parseState.GetInput(2) in (Microsoft.FSharp.Core.Operators.unbox data : 'node_group_content)) in
+            Microsoft.FSharp.Core.Operators.box
+                (
+                   (
+# 78 "GraphParser.fsy"
+                                                        log "n_grp_c2" ; _1 :: _2 
+                   )
+# 78 "GraphParser.fsy"
+                 : 'node_group_content));
 |]
-# 208 "GraphParser.fs"
+# 548 "GraphParser.fs"
 let tables () : Microsoft.FSharp.Text.Parsing.Tables<_> = 
   { reductions= _fsyacc_reductions ();
     endOfInputTag = _fsyacc_endOfInputTag;
@@ -224,7 +564,7 @@ let tables () : Microsoft.FSharp.Text.Parsing.Tables<_> =
                               match parse_error_rich with 
                               | Some f -> f ctxt
                               | None -> parse_error ctxt.Message);
-    numTerminals = 24;
+    numTerminals = 26;
     productionToNonTerminalTable = _fsyacc_productionToNonTerminalTable  }
 let engine lexer lexbuf startState = (tables ()).Interpret(lexer, lexbuf, startState)
 let start lexer lexbuf : string =
