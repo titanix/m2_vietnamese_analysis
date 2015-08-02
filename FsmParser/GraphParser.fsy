@@ -12,6 +12,7 @@ let log (x:string) = Debug.WriteLine ("call to rule\t" + x)
 %token STRICT GRAPH DIGRAPH SUBGRAPH RANKDIR
 %token OPEN_ACC CLOSE_ACC OPEN_BRACKET CLOSE_BRACKET
 %token QUOTE EQUAL SEMI_COLON COMMA DOT
+%token LABEL COLOR
 %token <string> COMMENT
 %token NEW_LINE EOF
 
@@ -36,17 +37,19 @@ graph_def:
 
 transition:
 	node ARROW node attributes SEMI_COLON				{ log "t1" }
-	| node_group ARROW node attributes SEMI_COLON			{ log "t2" }
+	| node_group ARROW node attributes SEMI_COLON		{ log "t2" }
 
 node:
 	IDENTIFIER											{ log ("i1: " + $1) }
 	| QUOTE IDENTIFIER QUOTE							{ log ("iQuote: " + $2) }
 
 attributes: /* empty */
-	| OPEN_BRACKET label_def CLOSE_BRACKET				{ log "attr1" }
+	| OPEN_BRACKET attribute_content CLOSE_BRACKET		{ log "attr1" }
 
-label_def: 
-	IDENTIFIER EQUAL QUOTE label_content QUOTE			{ log "label1" }
+attribute_content: 
+	LABEL EQUAL QUOTE label_content QUOTE				{ log "label1" }
+	| 
+	COLOR EQUAL QUOTE IDENTIFIER QUOTE					{ log "label2" }
 
 label_content: 
 	QUOC_LETTER											{ log "quoc1" }
