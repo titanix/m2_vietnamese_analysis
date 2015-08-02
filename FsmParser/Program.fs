@@ -57,7 +57,7 @@ let tokenize_from_string (content:string) =
         with
             | ex -> loop <- false ; ()
 
-let string_test = "strict digraph { Finale0_2 -> Finale2[label=\"c,h\"]; }"
+let string_test = "strict digraph { //lol \n Finale0_2 -> Finale2[label=\"c,h\"]; Begin -> Finale0_2[label=\"h\"]; }"
 let parse_test x  = 
     printf "Start Parsing...\n"
     let lexbuf = Lexing.LexBuffer<_>.FromString x
@@ -65,7 +65,8 @@ let parse_test x  =
 
 [<EntryPoint>]
 let main argv = 
-    //let lol = parse "/Users/Louis/Code/VietPhon/graph.dot"
+    let lol = parse "/Users/Louis/Code/VietPhon/graph.dot"
     tokenize_from_string string_test
+    let result = parse_test string_test
     0
 

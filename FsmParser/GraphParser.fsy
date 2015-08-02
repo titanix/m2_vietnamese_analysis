@@ -1,7 +1,8 @@
 %{
 open System
+open System.Diagnostics
 
-let log (x:string) = printf "call to rule\t%s\n"
+let log (x:string) = Debug.WriteLine ("call to rule\t" + x)
 %}
 
 %token <string> IDENTIFIER
@@ -21,31 +22,41 @@ let log (x:string) = printf "call to rule\t%s\n"
 
 %%
 
-start:	/* empty */ 									{ log"empty" ; "test" }
+start:	/* empty */ 									{ log "empty" ; "test" }
 	| DIGRAPH OPEN_ACC graph_def CLOSE_ACC				{ log "start 0" ; "" }
 	| DIGRAPH OPEN_ACC graph_def CLOSE_ACC EOF			{ log "start 1" ; "" }
-	| STRICT DIGRAPH OPEN_ACC graph_def CLOSE_ACC EOF	{ log "start 2" ; "" }
+	| STRICT DIGRAPH OPEN_ACC graph_def CLOSE_ACC EOF	{ log "start 2" ; "pwet" }
 
 graph_def:
-	transition { "" }
-	| transition graph_def { "" }
+	transition											{ log "g1" }
+	| transition graph_def								{ log "g2" }
+	| node SEMI_COLON graph_def							{ log "gNode" }
+	| NEW_LINE graph_def								{ log "gNL"}
+	| COMMENT graph_def									{ log "gCOM" }
 
 transition:
-	node ARROW node attributes SEMI_COLON { "" }
+	node ARROW node attributes SEMI_COLON				{ log "t1" }
+	| node_group ARROW node attributes SEMI_COLON			{ log "t2" }
 
 node:
-	IDENTIFIER { "" }
-	| QUOTE IDENTIFIER QUOTE { "" }
+	IDENTIFIER											{ log ("i1: " + $1) }
+	| QUOTE IDENTIFIER QUOTE							{ log ("iQuote: " + $2) }
 
 attributes: /* empty */
-	| OPEN_BRACKET label_def CLOSE_BRACKET { "" }
+	| OPEN_BRACKET label_def CLOSE_BRACKET				{ log "attr1" }
 
 label_def: 
-	IDENTIFIER EQUAL QUOTE label_content QUOTE { "" }
+	IDENTIFIER EQUAL QUOTE label_content QUOTE			{ log "label1" }
 
 label_content: 
-	QUOC_LETTER { "" }
-	| QUOC_LETTER COMMA label_content { "" }
+	QUOC_LETTER											{ log "quoc1" }
+	| QUOC_LETTER COMMA label_content					{ log "quoc2" }
 
+node_group: 
+	OPEN_ACC node_group_content CLOSE_ACC				{ log "node_group1" }
+
+node_group_content:
+	node												{ log "n_grp_c1" }
+	| node node_group_content							{ log "n_grp_c2" }
 
 %%
