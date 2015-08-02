@@ -37,7 +37,7 @@ let mutable comment_buffer = ""
 let whitespace	= [' ' '\t']
 let newline		= "\n\r" | '\n' | '\r'
 let char		= ['a'-'z' 'A'-'Z']
-let viet_letter	= ['a'-'e' 'g'-'i' 'k'-'v' 'y' 'z' 'đ' 'ơ' 'ư' 'ø' 'ê']
+let viet_letter	= ['a'-'e' 'g'-'i' 'k'-'v' 'x' 'y' 'z' 'đ' 'ơ' 'ư' 'ø' 'ê']
 let digit		= ['0'-'9']
 let comment		= "//"
 let arrow		= "->"
@@ -56,6 +56,8 @@ rule tokenize = parse
 	// on échappe les \n des valeurs des labels
 	| newline					{ NEW_LINE }
 
+	| "label"					{ LABEL }
+	| "color"					{ COLOR }
 	| layout_command			{ match keyword_map.TryFind(lexeme lexbuf) with 
                                       | Some(token) -> token
                                       | _ -> IDENTIFIER(lexeme  lexbuf) }
