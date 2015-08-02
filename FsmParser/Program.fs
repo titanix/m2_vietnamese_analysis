@@ -45,7 +45,27 @@ let parse (path:string) =
     printf "Start Parsing...\n"
     GraphParser.start GraphLexer.tokenize lexbuf
 
+
+ // temp à refactorer pour ne pas faire doublon avec la précédente
+let tokenize_from_string (content:string) =
+    printf "Start Lexing...\n"
+    let lexbuf = Lexing.LexBuffer<_>.FromString (content)
+    let mutable loop = true
+    while loop do
+        try
+            printf "%A\n" (GraphLexer.tokenize lexbuf)
+        with
+            | ex -> loop <- false ; ()
+
+let string_test = "strict digraph { Finale0_2 -> Finale2[label=\"c,h\"]; }"
+let parse_test x  = 
+    printf "Start Parsing...\n"
+    let lexbuf = Lexing.LexBuffer<_>.FromString x
+    GraphParser.start GraphLexer.tokenize lexbuf
+
 [<EntryPoint>]
 let main argv = 
-    let lol = tokenize "/Users/Louis/Code/VietPhon/graph.dot"
+    //let lol = parse "/Users/Louis/Code/VietPhon/graph.dot"
+    tokenize_from_string string_test
     0
+

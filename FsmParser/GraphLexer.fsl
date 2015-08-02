@@ -31,6 +31,7 @@ let punctuation_map =
     ]
     |> Map.ofList
 
+let mutable comment_buffer = ""
 }
 
 let whitespace	= [' ' '\t']
@@ -58,15 +59,19 @@ rule tokenize = parse
 	| layout_command			{ match keyword_map.TryFind(lexeme lexbuf) with 
                                       | Some(token) -> token
                                       | _ -> IDENTIFIER(lexeme  lexbuf) }
-	| comment					{ COMMENT_START }
+	| comment					{ comment_buffer <- "" ; handle_comment lexbuf }
 
+	| viet_letter				{ QUOC_LETTER(lexeme lexbuf) } // en cas d'ambiguité, on doit matcher les lettres d'abord
 	| identifier				{ IDENTIFIER(lexeme lexbuf) }
-	| viet_letter				{ QUOC_LETTER(lexeme lexbuf) }
 	| arrow						{ ARROW }
 
 	| quote						{ QUOTE }
 	| punctuation				{ match punctuation_map.TryFind(lexeme lexbuf) with 
                                       | Some(token) -> token
-                                      | _ -> IDENTIFIER(lexeme  lexbuf) }
+                                      | _ -> IDENTIFIER(lexeme lexbuf) }
 
 	| eof 						{ EOF }
+	 
+and handle_comment = parse
+	| newline					{ COMMENT(comment_buffer) }
+	| _							{ comment_buffer <- comment_buffer + (lexeme lexbuf) ; handle_comment lexbuf }

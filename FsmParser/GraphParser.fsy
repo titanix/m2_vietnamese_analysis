@@ -1,6 +1,7 @@
 %{
 open System
 
+let log (x:string) = printf "call to rule\t%s\n"
 %}
 
 %token <string> IDENTIFIER
@@ -10,14 +11,41 @@ open System
 %token STRICT GRAPH DIGRAPH SUBGRAPH RANKDIR
 %token OPEN_ACC CLOSE_ACC OPEN_BRACKET CLOSE_BRACKET
 %token QUOTE EQUAL SEMI_COLON COMMA DOT
-%token COMMENT_START COMMENT_END
+%token <string> COMMENT
 %token NEW_LINE EOF
+
+%token <string> DEBUG
 
 %start start
 %type <string> start
 
 %%
 
-start:	/* empty */ 	{ "test" }
+start:	/* empty */ 									{ log"empty" ; "test" }
+	| DIGRAPH OPEN_ACC graph_def CLOSE_ACC				{ log "start 0" ; "" }
+	| DIGRAPH OPEN_ACC graph_def CLOSE_ACC EOF			{ log "start 1" ; "" }
+	| STRICT DIGRAPH OPEN_ACC graph_def CLOSE_ACC EOF	{ log "start 2" ; "" }
+
+graph_def:
+	transition { "" }
+	| transition graph_def { "" }
+
+transition:
+	node ARROW node attributes SEMI_COLON { "" }
+
+node:
+	IDENTIFIER { "" }
+	| QUOTE IDENTIFIER QUOTE { "" }
+
+attributes: /* empty */
+	| OPEN_BRACKET label_def CLOSE_BRACKET { "" }
+
+label_def: 
+	IDENTIFIER EQUAL QUOTE label_content QUOTE { "" }
+
+label_content: 
+	QUOC_LETTER { "" }
+	| QUOC_LETTER COMMA label_content { "" }
+
 
 %%
