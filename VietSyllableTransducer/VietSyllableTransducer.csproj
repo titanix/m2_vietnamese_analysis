@@ -31,10 +31,23 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
+    <Reference Include="VietPhon">
+      <HintPath>..\..\VietPhon\bin\Debug\VietPhon.exe</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Main.cs" />
+    <Compile Include="VietSyllableTransducer.cs" />
+    <Compile Include="VstPartial.cs" />
+    <Compile Include="Syllable.cs" />
+    <Compile Include="DefaultTransitionReachedException.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
+  <ItemGroup>
+    <ProjectReference Include="..\YieldMachine\YieldMachine.csproj">
+      <Project>{DB51E37B-2FAE-4CA9-859E-6D6D8ACB5EC2}</Project>
+      <Name>YieldMachine</Name>
+    </ProjectReference>
+  </ItemGroup>
 </Project>

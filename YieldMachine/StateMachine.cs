@@ -11,7 +11,7 @@ namespace YieldMachine
     /// Base class for state machines. Implement the WalkStates() method to use.
     /// See the LampExample for an example
     /// </summary>
-    public abstract class StateMachine
+    public abstract class StateMachine<T>
     {
         private IEnumerator currentState;
 
@@ -19,7 +19,9 @@ namespace YieldMachine
         /// Is set to the trigger that was called most recently. Always contains a reference
         /// to a child class property/field decorated with the [Trigger] attribute.
         /// </summary>
-        protected Action Trigger { get; private set; }
+        protected Action<T> Trigger { get; private set; }
+
+        protected T actionParameter { get; private set; }
 
         public StateMachine()
         {
@@ -50,12 +52,13 @@ namespace YieldMachine
         /// <summary>
         /// Creates an action object that, when called, sets `Trigger` to itself and then moves to the next state.
         /// </summary>
-        private Action MakeTrigger()
+        private Action<T> MakeTrigger()
         {
-            Action foo = null;
-            foo = () =>
+            Action<T> foo = null;
+            foo = (T arg) =>
             {
                 Trigger = foo;
+                actionParameter = arg;
                 currentState.MoveNext();
             };
             return foo;
@@ -63,10 +66,12 @@ namespace YieldMachine
 
         private void VerifyMemberType(Type type)
         {
+            /*
             if (type != typeof(Action))
             {
                 throw new InvalidStateMachineException("Fields/properties decorated with [Trigger] must be of type Action");
             }
+            */
         }
 
         /// <summary>

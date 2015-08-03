@@ -57,8 +57,8 @@ attributes: /* empty */
 attribute_content: 
 	label_content										{ log "attr_c1" ; $1 }
 	| color_content										{ log "attr_c2" ; [] }
-	| label_content COMMA attribute_content				{ log "attr_c3" ; [] }
-	| color_content COMMA attribute_content				{ log "attr_c4" ; [] }
+	| label_content COMMA attribute_content				{ log "attr_c3" ; $1 }
+	| color_content COMMA attribute_content				{ log "attr_c4" ; $3 }
 
 label_content:
 	LABEL EQUAL QUOTE label_value QUOTE					{ log "label_content"  ; $4 }
