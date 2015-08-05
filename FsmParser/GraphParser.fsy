@@ -76,6 +76,7 @@ node_group:
 node_group_content:
 	node												{ log "n_grp_c1" ; [$1] }
 	| node node_group_content							{ log "n_grp_c2" ; $1 :: $2 }
+	| NEW_LINE node_group_content						{ log "n_grp_c3" ; $2 }
 
 %%
 let print_result = List.map (fun (n1, n2, t) -> Console.WriteLine("transition :" + n1 + " " + n2 + " " + t )) tr_table
