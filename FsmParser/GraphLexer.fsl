@@ -36,7 +36,7 @@ let mutable comment_buffer = ""
 
 let whitespace	= [' ' '\t']
 let newline		= "\n\r" | '\n' | '\r'
-let char		= ['a'-'z' 'A'-'Z']
+let char		= ['a'-'z' 'A'-'Z' 'é' 'è' 'â' 'ô']
 let viet_letter	= ['a'-'e' 'g'-'i' 'k'-'v' 'x' 'y' 'z' 'đ' 'ơ' 'ư' 'ø' 'ê']
 let digit		= ['0'-'9']
 let comment		= "//"
