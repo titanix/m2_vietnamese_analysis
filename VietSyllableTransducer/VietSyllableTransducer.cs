@@ -42,49 +42,152 @@ namespace VietSyllableTransducer
         }
         #endregion
 
-        partial void OutAchFunctionHandler ()
+        partial void OutAchFunctionHandler()
         {
             syllable.FinalConsonant = "ch";
-            syllable.ConsonantNucleus = "a";
+            syllable.VowelNucleus = "a";
         }
 
-        partial void OutAnhFunctionHandler ()
+        partial void OutAnhFunctionHandler()
         {
             syllable.FinalConsonant = "nh";
-            syllable.ConsonantNucleus = "a";
+            syllable.VowelNucleus = "a";
         }
 
-        #region Noyau Consonantique
+        partial void OutFIFunctionHandler()
+        {
+            syllable.FinalConsonant = "i";
+            syllable.VowelNucleus = base.actionParameter.ToString();
+        }
+
+        partial void OutGIFunctionHandler()
+        {
+            syllable.VowelNucleus = "i";
+            syllable.InitialConsonant = "d";
+        }
+
+        partial void OutAEoFunctionHandler()
+        {
+            syllable.FinalConsonant = "u";
+            syllable.VowelNucleus = base.actionParameter.ToString();
+        }
+
+        partial void OutXHnIFunctionHandler()
+        {
+            syllable.VowelNucleus = "i";
+            syllable.InitialConsonant = base.actionParameter.ToString() + "h";
+        }
+
+        partial void OutHnIFunctionHandler()
+        {
+            syllable.VowelNucleus = "i";
+            syllable.InitialConsonant = "h";
+        }
+
+        partial void OutNGHnIFunctionHandler()
+        {
+            syllable.VowelNucleus = "i";
+            syllable.InitialConsonant = "ngh";
+        }
+
+        partial void OutGHnIFunctionHandler()
+        {
+            syllable.VowelNucleus = "i";
+            syllable.InitialConsonant = "gh";
+        }
+
+        partial void InitGhnIFunctionHandler()
+        {
+            syllable.VowelNucleus = "i";
+            syllable.InitialConsonant = base.actionParameter.ToString();
+        }
+
+        partial void OutTRnIFunctionHandler()
+        {
+            syllable.VowelNucleus = "i";
+            syllable.InitialConsonant = "tr";
+        }
+
+        partial void OutRnIFunctionHandler()
+        {
+            syllable.VowelNucleus = "i";
+            syllable.InitialConsonant = "r";
+        }
+
+        partial void InitGenNiFunctionHandler()
+        {
+            syllable.VowelNucleus = "i";
+            syllable.InitialConsonant = base.actionParameter.ToString();
+        }
+
+        #region Noyau Vocalique
+        partial void OutOFunctionHandler()
+        {
+            syllable.VowelNucleus = "o";
+        }
+
         partial void NvYEndFunctionHandler()
         {
-            syllable.ConsonantNucleus = "y";
+            syllable.VowelNucleus = "y";
         }
 
         partial void NvGenFunctionHandler()
         {
-            syllable.ConsonantNucleus = base.actionParameter.ToString();
+            syllable.VowelNucleus = base.actionParameter.ToString();
         }
 
         partial void OutYeFunctionHandler()
         {
-            syllable.ConsonantNucleus = "ya"; // cas particulier
+            syllable.VowelNucleus = "ya"; // cas particulier
         }
 
         partial void OutIEFunctionHandler()
         {
-            syllable.ConsonantNucleus = "iê";
+            syllable.VowelNucleus = "iê";
         }
 
         partial void NvAFunctionHandler ()
         {
-            syllable.ConsonantNucleus = "a";
+            syllable.VowelNucleus = "a";
         }
 
-        partial void NvAchFunctionHandler ()
+        partial void NvAchFunctionHandler()
         {
-            syllable.ConsonantNucleus = "e"; // cas particulier
+            syllable.VowelNucleus = "e"; // cas particulier
+        }
+
+        partial void OutYaFunctionHandler()
+        {
+            syllable.VowelNucleus = "a";
+            syllable.FinalConsonant = "i";
+        }
+
+        partial void OutUbFunctionHandler()
+        {
+            syllable.VowelNucleus = "ư" + syllable.VowelNucleus;
+        }
+
+        partial void OutUpFunctionHandler()
+        {
+            syllable.VowelNucleus = "ư" + syllable.VowelNucleus;
+        }
+
+        partial void OutDiphFunctionHandler()
+        {
+            syllable.VowelNucleus = "i" + syllable.VowelNucleus;
+        }
+
+        partial void NvUFunctionHandler()
+        {
+            syllable.VowelNucleus = "u";
         }
         #endregion
+
+        partial void PrétonaleUOFunctionHandler()
+        {
+            syllable.VowelNucleus = "o";
+            syllable.Prefrontal = "u";
+        }
 
         #region Pretonale
         partial void PretonaleUFunctionHandler()
@@ -99,47 +202,47 @@ namespace VietSyllableTransducer
             syllable.InitialConsonant = base.actionParameter.ToString();
         }
 
-        partial void OutXHFunctionHandler ()
+        partial void OutXHFunctionHandler()
         {
             syllable.InitialConsonant = base.actionParameter.ToString() + "h";
         }
 
-        partial void OutNGHFunctionHandler ()
+        partial void OutNGHFunctionHandler()
         {
             syllable.InitialConsonant = "ngh";
         }
 
-        partial void OutGHFunctionHandler ()
+        partial void OutGHFunctionHandler()
         {
             syllable.InitialConsonant = "gh";
         }
 
-        partial void OutHFunctionHandler ()
+        partial void OutHFunctionHandler()
         {
             syllable.InitialConsonant = "h";
         }
 
-        partial void OutNGFunctionHandler ()
+        partial void OutNGFunctionHandler()
         {
             syllable.InitialConsonant = "ng";
         }
 
-        partial void OutGFunctionHandler ()
+        partial void OutGFunctionHandler()
         {
             syllable.InitialConsonant = "g";
         }
 
-        partial void OutTRFunctionHandler ()
+        partial void OutTRFunctionHandler()
         {
             syllable.InitialConsonant = "tr";
         }
 
-        partial void OutRFunctionHandler ()
+        partial void OutRFunctionHandler()
         {
             syllable.InitialConsonant = "r";
         }
 
-        partial void InitQFunctionHandler ()
+        partial void InitQFunctionHandler()
         {
             syllable.InitialConsonant = "q";
         }
