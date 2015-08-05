@@ -28,6 +28,8 @@ let rec indent (str, depth) = if depth <= 0 then str else indent("\t" + str, dep
 let create_fsm_file (table: (string * string * char) list) =
     let final_state_name = "__END"
     let method_suffix_name = "FunctionHandler"
+    let alphabet = ['a'; 'b'; 'c'; 'd'; 'e' ; 'g'; 'h'; 'i'; 'k'; 'l'; 'm'; 'n'; 'o'; 'p'; 'q'; 'r'; 's'; 't'; 'u';
+    'v'; 'x'; 'y'; 'z'; 'đ'; 'ơ'; 'ư'; 'ø'; 'ê'] |> Set.ofList
     // génération du contenu de la méthode VietSyllableTransducer.WalkStates (états non finaux)
     let method_content = 
         table 
@@ -35,7 +37,9 @@ let create_fsm_file (table: (string * string * char) list) =
         |> Seq.map (fun (key,value) -> String.Concat (indent(key, 2), ":\n",
             indent(String.Format("{0}{1}();\n", key, method_suffix_name), 3),
             indent("yield return null;\n", 3), 
-            String.Concat(Seq.map (fun (_, n, t) -> String.Format(indent("if(actionParameter == '{0}') goto {1};\n", 3), t, n)) value), 
+            String.Concat(Seq.map (fun (_, n, t) -> String.Format(indent("if(actionParameter == '{0}') goto {1};\n", 3), t, n)) value),
+            String.Concat(Set.map (fun x -> indent(String.Format("#warning missing transition for symbol {0}\n", x), 3)) 
+                (Set.difference alphabet (Set.ofSeq (Seq.map (fun (_, _, t) -> t) value)))),
             indent(String.Format("defaultTransitionReached = \"{0}\";\n", key), 3),
             indent(String.Format("goto {0};\n", final_state_name), 3)))
         |> String.Concat
