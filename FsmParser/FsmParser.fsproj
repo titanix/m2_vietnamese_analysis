@@ -9,6 +9,7 @@
     <OutputType>Exe</OutputType>
     <RootNamespace>FsmParser</RootNamespace>
     <AssemblyName>FsmParser</AssemblyName>
+    <RunPostBuildEvent>Always</RunPostBuildEvent>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -19,7 +20,7 @@
     <Externalconsole>true</Externalconsole>
     <PlatformTarget>
     </PlatformTarget>
-    <StartArguments>"I:\Code Projects\Git\VietPhonology\graph.dot"</StartArguments>
+    <StartArguments>"I:\Code Projects\Git\Automaton\VietPhonology\Data\graph.dot" "I:\Code Projects\Git\Automaton\VietSyllableTransducer\VstPartial.cs"</StartArguments>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugSymbols>false</DebugSymbols>
@@ -65,4 +66,8 @@
       <HintPath>..\packages\FsLexYacc.Runtime.6.1.0\lib\net40\FsLexYacc.Runtime.dll</HintPath>
     </Reference>
   </ItemGroup>
+  <PropertyGroup>
+    <PostBuildEvent>
+    </PostBuildEvent>
+  </PropertyGroup>
 </Project>

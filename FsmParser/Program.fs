@@ -25,7 +25,7 @@ let print_result (table: (string * string * char) list) =
 
 let rec indent (str, depth) = if depth <= 0 then str else indent("\t" + str, depth - 1)
 
-let create_fsm_file (table: (string * string * char) list) =
+let create_fsm_file (table: (string * string * char) list, outfile_path:string) =
     let final_state_name = "__END"
     let method_suffix_name = "FunctionHandler"
     let alphabet = ['a'; 'b'; 'c'; 'd'; 'e' ; 'g'; 'h'; 'i'; 'k'; 'l'; 'm'; 'n'; 'o'; 'p'; 'q'; 'r'; 's'; 't'; 'u';
@@ -87,7 +87,7 @@ let create_fsm_file (table: (string * string * char) list) =
             indent("\n}", 1),
             indent("\n}", 0))
 
-    use output_file = new StreamWriter("../../../VietSyllableTransducer/VstPartial.cs", false, System.Text.Encoding.UTF8)
+    use output_file = new StreamWriter(outfile_path, false, System.Text.Encoding.UTF8)
     output_file.Write(file_content)
     0
 
@@ -95,7 +95,8 @@ let create_fsm_file (table: (string * string * char) list) =
 [<EntryPoint>]
 let main argv =
     match argv with
-    | [| path |] -> parse path |> ignore
-                    create_fsm_file (GraphParser.tr_table |> List.ofSeq) |> ignore
-                    0
-    | _ ->          1
+    | [| graph_path ; out_path |] -> parse graph_path |> ignore
+                                     let tr_table = GraphParser.tr_table |> List.ofSeq
+                                     create_fsm_file (tr_table, out_path) |> ignore
+                                     0
+    | _ -> 1
