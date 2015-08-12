@@ -36,7 +36,7 @@ let applyReplaceFunctions str:string =
 
 [<EntryPoint>]
 let main argv = 
-    let seqNom = readNomFile("/Users/Louis/Code/VietPhon/Data/nom_level_1+2.txt")
+    let seqNom = readNomFile("Data/nom_level_1+2.txt")
     let listNom = seqNom |> Seq.toList
 
     listNom 

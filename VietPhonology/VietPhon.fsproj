@@ -32,9 +32,15 @@
   <ItemGroup>
     <Compile Include="AssemblyInfo.fs" />
     <Compile Include="Program.fs" />
-    <None Include="Data\baxter.txt" />
-    <None Include="Data\nom_level_1+2.txt" />
-    <None Include="Data\nom_level_1.txt" />
+    <None Include="Data\baxter.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Data\nom_level_1+2.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Data\nom_level_1.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Include="Data\graph.dot" />
   </ItemGroup>
   <ItemGroup>
