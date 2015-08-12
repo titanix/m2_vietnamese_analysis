@@ -32,7 +32,10 @@ namespace MCPhon
                         try
                         {
                             McReconstruction mcr = new McReconstruction(temp);
-                            dictionary.Add(hanzi, mcr);
+                            if (!dictionary.ContainsKey(hanzi))
+                            {
+                                dictionary.Add(hanzi, mcr);
+                            }
                         }
                         catch
                         {

@@ -1,4 +1,5 @@
-﻿using System;
+﻿/*
+using System;
 using System.IO;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,9 +9,8 @@ namespace VietSyllableTransducer
 {
     public class Transducer
     {
-        public static void Main ()
+        public static void Main()
         {
-            //   
             string test1 = "quan là một nhà cách mạng, người sáng lập Đảng Cộng sản Việt Nam, một trong những người đặt nền " +
                 "móng và lãnh đạo công cuộc đấu tranh giành độc lập, toàn vẹn lãnh thổ cho Việt Nam trong thế kỷ ";
             string test2 = "Là một lãnh tụ được nhiều người ngưỡng mộ và tôn sùng, lăng của ông được xây ở Hà Nội, " +
@@ -21,18 +21,20 @@ namespace VietSyllableTransducer
             //AnalyzeString(test1);
 
             string content = "";
-            using(StreamReader sr = new StreamReader("/Users/Louis/Code/YieldMachine/VietSyllableTransducer/syllable_level_1+2.txt"))
+            using (StreamReader sr = new StreamReader("Data/syllable_level_1+2.txt"))
             {
                 content = sr.ReadToEnd();
             }
-            content = 
-                content.Replace("\n", " ");
+            content = content.Replace("\n", " ");
+            content = content.Replace("\r", " ");
+            content = content.Replace("  ", " ");
             AnalyzeString(content);
+
+            Console.ReadKey();
         }
 
         public static void AnalyzeString(string str)
         {
-            
             str = str.Replace(",", "");
             str = str.ToLower();
             str = Program.applyReplaceFunctions(str);
@@ -40,21 +42,29 @@ namespace VietSyllableTransducer
             List<string> sList = syllable.ToList().Distinct().ToList();
             sList.Sort();
 
-            foreach (string s in sList) 
+            foreach (string s in sList)
             {
-                VietSyllableTransducer vst = new VietSyllableTransducer();
-                Syllable result = vst.AnalyzeSyllable(s);
-                if(String.IsNullOrEmpty(vst.DefaultTransitionReached))
-                {
-                    Console.WriteLine(String.Format("{1}\t{0}", result, s));
-                }
-                else 
-                {
-                    Console.WriteLine(String.Format("{2}\t{0}\t[{1}]", result, vst.DefaultTransitionReached, s));
-                }
+                Syllable sy = AnalyseSyllable(s);
             }
+        }
+
+        public static Syllable AnalyseSyllable(string syllable)
+        {
+            VietSyllableTransducer vst = new VietSyllableTransducer();
+            Syllable result = vst.AnalyzeSyllable(syllable);
+
+            // à refactoriser
+            if (String.IsNullOrEmpty(vst.DefaultTransitionReached))
+            {
+                Console.WriteLine(String.Format("{0}\t{1}\t{2}", syllable, result, result.VietDex()));
+            }
+            else
+            {
+                Console.WriteLine(String.Format("{0}\t{1}\t[{2}]", syllable, result, vst.DefaultTransitionReached));
+            }
+
+            return result;
         }
     }
 }
-
-
+*/

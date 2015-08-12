@@ -6,7 +6,7 @@
     <ProductVersion>8.0.30703</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{19E24F46-FC3F-46D6-B0DC-FF6CE8305C35}</ProjectGuid>
-    <OutputType>Exe</OutputType>
+    <OutputType>Library</OutputType>
     <RootNamespace>VietSyllableTransducer</RootNamespace>
     <AssemblyName>VietSyllableTransducer</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
@@ -30,12 +30,16 @@
     <WarningLevel>4</WarningLevel>
     <Externalconsole>true</Externalconsole>
   </PropertyGroup>
+  <PropertyGroup>
+    <StartupObject />
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Main.cs" />
+    <Compile Include="Vietdex.cs" />
     <Compile Include="VietSyllableTransducer.cs" />
     <Compile Include="VstPartial.cs" />
     <Compile Include="Syllable.cs" />
@@ -43,9 +47,9 @@
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>
-    <ProjectReference Include="..\VietPhonology\VietPhon.fsproj">
-      <Project>{8d03d99f-e198-4265-94b4-e11fc17de1ca}</Project>
-      <Name>VietPhon</Name>
+    <ProjectReference Include="..\MCPhon\MCPhon.csproj">
+      <Project>{a1051d24-348e-450d-a16f-c229c211e996}</Project>
+      <Name>MCPhon</Name>
     </ProjectReference>
     <ProjectReference Include="..\YieldMachine\YieldMachine.csproj">
       <Project>{DB51E37B-2FAE-4CA9-859E-6D6D8ACB5EC2}</Project>
@@ -54,5 +58,10 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Data\syllable_level_1+2.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 </Project>

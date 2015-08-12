@@ -14,3 +14,7 @@ Implémentation du transducer d'analyse d'une syllabe vietnamienne et point d'ent
 
 * YieldMachine
 Classe de base pour l'implémentation d'un automate.
+
+
+Bugs
+bên -> b///n
