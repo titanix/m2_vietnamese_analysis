@@ -5,7 +5,7 @@ using YieldMachine;
 
 namespace VietSyllableTransducer
 {
-    partial class VietSyllableTransducer : StateMachine<char>
+    public partial class VietSyllableTransducer : StateMachine<char>
     {
         [Trigger]
         public readonly Action<char> ReadLetter;
