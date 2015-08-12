@@ -2,7 +2,7 @@
 
 namespace VietSyllableTransducer
 {
-    public class DefaultTransitionReachedException
+    public class DefaultTransitionReachedException : Exception
     {
         public DefaultTransitionReachedException ()
         {
