@@ -9,7 +9,8 @@
     <OutputType>Exe</OutputType>
     <RootNamespace>VietSyllableTransducer</RootNamespace>
     <AssemblyName>VietSyllableTransducer</AssemblyName>
-    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -50,5 +51,8 @@
       <Project>{DB51E37B-2FAE-4CA9-859E-6D6D8ACB5EC2}</Project>
       <Name>YieldMachine</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="app.config" />
   </ItemGroup>
 </Project>
