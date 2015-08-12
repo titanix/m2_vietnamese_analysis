@@ -1,0 +1,190 @@
+strict digraph {
+	//splines=line;
+
+	//subgraph cluster_Finale {
+		//label="Finale";
+		Begin -> Finale1[label="p,t,k,m,n,c"];
+		Begin -> FinaleH[label="h"];
+		Begin -> Finale0_3[label="g"];
+		Begin -> NvGen[label="e,a"];
+		Begin -> FinaleO[label="o"];
+		Begin -> EtatI[label="i"];
+		Begin -> NvGen[label="a,e,i,ơ"];
+		Begin -> NvE[label="ê"];
+		Begin -> NvY[label="y"];
+		Begin -> OutUb[label="ư"];
+		
+		FinaleH -> FinaleNH[label="n"];
+		FinaleH -> FinaleCH[label="c"];
+		
+		Finale0_3 -> Finale3[label="n"];
+	
+		FinaleO -> OutO[label="ø"];
+		FinaleO -> OutAEo[label="a,e"];
+		FinaleO -> PrétonaleUO[label="u"];	
+		OutAEo -> End[label="ø"];
+		
+		EtatI -> OutFI[label="a,o,ư,ơ,e"];
+		EtatI -> OutGI[label="g"];
+		EtatI -> NvU[label="u"];
+		// TODO EtatI -> InitGen2 etc...
+		OutFI -> End[label="ø"];
+		OutFI -> OutUb[label="ư"];
+		OutFI -> OutUp[label="u,o"];
+	//}
+	
+	FinaleCH -> NvAch[label="a"];
+	FinaleNH -> NvAnh[label="a"];
+	FinaleCH -> NvGen[label="y,i,e"];
+	FinaleNH -> NvGen[label="y,i,e"];
+	
+	NvAch -> OutAch[label="ø"];
+	NvAnh -> OutAnh[label="ø"];
+	
+	//subgraph cluster_NoyauVocalique {
+		NvGen;
+		NvAch;
+		NvYe;
+		NvA;
+		
+		NvGen -> End[label="ø"];
+		//label="Noyau Vocalique";
+		NvGen -> OutUb[label="ư"];
+		NvGen -> OutDiph[label="i"];
+		
+		NvY -> NvYEnd[label="ø"];
+		
+		Finale1 -> NvGen[label="y,i,a,o,ơ,e"];
+		Finale3 -> NvGen[label="y,e,i,o,ư,ơ"];
+		
+		Finale3 -> NvA[label="a"];
+		
+		Finale1 -> NvYe[label="ê"];
+		FinaleCH -> NvYe[label="ê"];
+		FinaleNH -> NvYe[label="ê"];
+		Finale3 -> NvYe[label="ê"];
+		Finale3 -> NvU[label="u"];
+		
+		NvYe -> OutYe[label="y"];
+		
+		NvE -> OutIE[label="i"];
+		OutIE -> PretonaleU[label="u,o"];
+		
+		NvY -> OutYa[label="a"];
+		OutYa -> End[label="ø"];
+	//}
+	
+	//subgraph cluster_Pretonale {
+	//	label="Pretonale";
+		NvGen -> PretonaleU[label="u,o"];
+		NvYe -> PretonaleU[label="u,o"];
+		OutYe -> PretonaleU[label="u,o"];
+	
+		PretonaleU -> PretonaleEnd[label="ø"];
+		PretonaleU -> InitQ[label="q"];
+		InitQ -> End[label="ø"];
+	//}
+	
+	{ OutIE NvGen OutYe NvYe PretonaleU NvAch NvA NvAnh OutYa OutAEo PrétonaleUO
+	OutFI OutUb OutDiph OutUp NvU FuNx OutNvpI FuNi Ob OutUO NvY } -> InitH[label="h",color="blue"];
+	
+	{ OutIE NvGen OutYe NvYe PretonaleU NvAch NvA NvAnh OutYa OutAEo PrétonaleUO 
+	OutFI OutUb OutDiph OutUp NvU FuNx OutNvpI FuNi Ob OutUO NvY }  -> InitG[label="g",color="orange"];
+	
+	{ OutIE NvGen OutYe NvYe PretonaleU NvAch NvA NvAnh OutYa OutAEo PrétonaleUO
+	OutFI OutUb OutDiph OutUp NvU FuNx OutNvpI FuNi Ob OutUO NvY }  -> InitGen[label="b,m,p,t,\nx,d,đ,l,\nn,s,v,c",color="red"];
+	
+	{ OutIE NvGen OutYe NvYe PretonaleU NvAch NvA NvAnh OutYa OutAEo PrétonaleUO
+	OutFI OutUb OutDiph OutUp NvU FuNx OutNvpI FuNi Ob OutUO NvY }  -> InitR[label="r",color="green"];
+	
+	//subgraph cluster_Initiale {
+	//	label="Initiale";
+		
+		InitH -> OutXH[label="c,n,p,k,t"];
+		InitH -> InitGH[label="g"];
+		InitH -> OutH[label="ø"];
+		InitGH -> OutNGH[label="n"];
+		InitGH -> OutGH[label="ø"];
+		OutNGH -> End[label="ø"];
+		OutXH -> End[label="ø"];
+		
+		InitG -> OutNG[label="n"];
+		OutNG -> End[label="ø"];
+		InitG -> OutG[label="ø"];	
+		
+		InitGen -> End[label="ø"];
+		
+		InitR -> OutTR[label="t"];
+		OutTR -> End[label="ø"];
+		InitR -> OutR[label="ø"];
+		
+		
+		EtatI -> InitHnI[label="h"];
+		EtatI -> InitGenNi[label="b,m,p,t,c,x,d,đ,l,n,s,v,k"];
+		EtatI -> InitRnI[label="r"];
+		
+		InitHnI -> OutHnI[label="ø"];
+		InitHnI -> OutXHnI[label="c,n,p,k,t"];
+		InitHnI -> InitGhnI[label="g"];
+		InitGhnI -> OutNGHnI[label="n"];
+		InitGhnI -> OutGHnI[label="ø"];
+		
+		InitRnI -> OutTRnI[label="t"];
+		InitRnI -> OutRnI[label="ø"];
+		
+		OutXHnI -> End[label="ø"];
+		OutNGHnI -> End[label="ø"];
+		OutTRnI -> End[label="ø"];
+		InitGenNi -> End[label="ø"];
+	//}
+	
+	Begin -> EtatU[label="u"];
+	EtatU -> FuNx[label="a,ê"];
+	EtatU -> FuNi[label="i"];
+	FuNx -> OutNvpI[label="i,y"];
+	EtatU -> Ob[label="ơ,o"];
+	Ob -> OutUO[label="u,ư"];
+	
+	FinaleO -> InitHnO[label="h"];
+	FinaleO -> InitGenNO[label="b,m,p,t,c,x,d,đ,l,n,s,v"];
+	FinaleO -> InitRnO[label="r"];
+	FinaleO -> InitGnO[label="g"];
+	
+	InitHnO -> OutXHnO[label="c,n,p,k,t"];
+	InitHnO -> InitGHnO[label="g"];
+	InitHnO -> OutHnO[label="ø"];
+	InitGHnO -> OutNGHnO[label="n"];
+	InitGHnO -> OutGHnO[label="ø"];
+	OutXHnO -> End[label="ø"];
+	OutNGHnO -> End[label="ø"];
+	InitGenNO -> End[label="ø"];
+	InitRnO -> OutTRnO[label="t"];
+	InitRnO -> OutRnO[label="ø"];
+	OutTRnO -> End[label="ø"];
+	
+	InitGnO -> End[label="ø"];
+	InitGnO -> OutGNnO[label="n"];
+	OutGNnO -> End[label="ø"];
+	
+		
+	EtatU -> InitHnU[label="h"];
+	EtatU -> InitGenNU[label="b,m,p,t,c,x,d,đ,l,n,s,v"];
+	EtatU -> InitRnU[label="r"];
+	EtatU -> InitGnU[label="g"];
+	
+	InitHnU -> OutXHnU[label="c,n,p,k,t"];
+	InitHnU -> InitGHnU[label="g"];
+	InitHnU -> OutHnU[label="ø"];
+	InitGHnU -> OutNGHnU[label="n"];
+	InitGHnU -> OutGHnU[label="ø"];
+	OutXHnU -> End[label="ø"];
+	OutNGHnU -> End[label="ø"];
+	InitGenNU -> End[label="ø"];
+	InitRnU -> OutTRnU[label="t"];
+	InitRnU -> OutRnU[label="ø"];
+	OutTRnU -> End[label="ø"];
+	
+	InitGnU -> End[label="ø"];
+	InitGnU -> OutGNnU[label="n"];
+	OutGNnU -> End[label="ø"];
+}

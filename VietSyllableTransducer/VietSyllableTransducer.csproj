@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
@@ -31,9 +31,6 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
-    <Reference Include="VietPhon">
-      <HintPath>..\..\VietPhon\bin\Debug\VietPhon.exe</HintPath>
-    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -45,6 +42,10 @@
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>
+    <ProjectReference Include="..\VietPhonology\VietPhon.fsproj">
+      <Project>{8d03d99f-e198-4265-94b4-e11fc17de1ca}</Project>
+      <Name>VietPhon</Name>
+    </ProjectReference>
     <ProjectReference Include="..\YieldMachine\YieldMachine.csproj">
       <Project>{DB51E37B-2FAE-4CA9-859E-6D6D8ACB5EC2}</Project>
       <Name>YieldMachine</Name>

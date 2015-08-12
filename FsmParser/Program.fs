@@ -93,8 +93,9 @@ let create_fsm_file (table: (string * string * char) list) =
 
 
 [<EntryPoint>]
-let main argv = 
-    //let pwet = tokenize "/Users/Louis/Code/VietPhon/graph.dot"
-    parse "/Users/Louis/Code/VietPhon/graph.dot" |> ignore
-    create_fsm_file (GraphParser.tr_table |> List.ofSeq) |> ignore
-    0
+let main argv =
+    match argv with
+    | [| path |] -> parse path |> ignore
+                    create_fsm_file (GraphParser.tr_table |> List.ofSeq) |> ignore
+                    0
+    | _ ->          1
