@@ -41,6 +41,7 @@ type block =
     | MAIN_ENTRY
     | COMPOUND_LIST
     | UNKNOW
+    | JUNK
     override x.ToString() = sprintf "%A" x
 
 [<EntryPoint>]
@@ -53,5 +54,9 @@ let main argv =
         block_list 
         |> List.map (fun (a:string, b:block) -> if a.Contains("O") && b = UNKNOW then (a, COMPOUND_LIST) else (a, b))
         |> List.map (fun (a:string, b:block) -> if a.Contains("星") && b = UNKNOW then (a, MAIN_ENTRY) else (a, b))
+        // ces règles doivent être appliquées après les deux premières, car son tmoins précises
+        |> List.map (fun (a:string, b:block) -> if a.Contains("CC") && b = UNKNOW then (a, MAIN_ENTRY) else (a, b))
+        |> List.map (fun (a:string, b:block) -> if a.Contains("假C") && b = UNKNOW then (a, MAIN_ENTRY) else (a, b))
+        |> List.map (fun (a:string, b:block) -> if a.Contains("開閉") && b = UNKNOW then (a, JUNK) else (a, b))
 
     0 // return an integer exit code
