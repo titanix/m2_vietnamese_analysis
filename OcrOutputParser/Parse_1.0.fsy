@@ -1,0 +1,19 @@
+﻿%{
+
+
+%}
+
+%token SECTION_BREAK
+
+create_section:
+
+
+
+suppression des sauts de lignes et délimitation des blocs :
+NL NL -> SECTION_BREAK
+NL -> (rien)
+
+suppression des tirets surnuméraires :
+TIRET TIRET -> TIRET
+
+DOT _+ STAR -> DOT FAKE_WORD+ STAR
