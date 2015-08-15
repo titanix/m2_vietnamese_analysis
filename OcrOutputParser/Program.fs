@@ -44,19 +44,32 @@ type block =
     | JUNK
     override x.ToString() = sprintf "%A" x
 
+let rec merge_comp_block block_list = 
+    match block_list with
+        | []             -> []
+        | a :: b :: tail -> let (lt1, str1, b1) = a
+                            let (lt2, str2, b2) = b
+                            if b1 = COMPOUND_LIST && b2 = COMPOUND_LIST
+                            then
+                                let new_elem = (lt1 @ lt2, str1 + str2, COMPOUND_LIST)
+                                (merge_comp_block (new_elem :: tail))
+                            else 
+                                a :: (merge_comp_block (b :: tail))
+        | head :: tail   -> head :: (merge_comp_block tail)
+
 [<EntryPoint>]
 let main argv = 
     //tokenize @"I:\Code Projects\Git\Automaton\OcrOutputParser\ocr1.txt"
-    let res = cb_helpers @"I:\Code Projects\Git\Automaton\OcrOutputParser\ocr1.txt"
-    let block_str = List.map (fun x -> x |> List.map (fun a -> a.ToString()) |> String.Concat) res
-    let block_list = List.map (fun x -> (x, UNKNOW)) block_str
+    let result = cb_helpers @"I:\Code Projects\Git\Automaton\OcrOutputParser\ocr1.txt"
+    let block_list = List.map (fun x -> (x, (x |> List.map (fun a -> a.ToString()) |> String.Concat), UNKNOW)) result
     let modified_list = 
         block_list 
-        |> List.map (fun (a:string, b:block) -> if a.Contains("O") && b = UNKNOW then (a, COMPOUND_LIST) else (a, b))
-        |> List.map (fun (a:string, b:block) -> if a.Contains("星") && b = UNKNOW then (a, MAIN_ENTRY) else (a, b))
+        |> List.map (fun (lt, a:string, b:block) -> if a.Contains("O") && b = UNKNOW then (lt, a, COMPOUND_LIST) else (lt, a, b))
+        |> List.map (fun (lt, a:string, b:block) -> if a.Contains("星") && b = UNKNOW then (lt, a, MAIN_ENTRY) else (lt, a, b))
         // ces règles doivent être appliquées après les deux premières, car son tmoins précises
-        |> List.map (fun (a:string, b:block) -> if a.Contains("CC") && b = UNKNOW then (a, MAIN_ENTRY) else (a, b))
-        |> List.map (fun (a:string, b:block) -> if a.Contains("假C") && b = UNKNOW then (a, MAIN_ENTRY) else (a, b))
-        |> List.map (fun (a:string, b:block) -> if a.Contains("開閉") && b = UNKNOW then (a, JUNK) else (a, b))
+        |> List.map (fun (lt, a:string, b:block) -> if a.Contains("CC") && b = UNKNOW then (lt, a, MAIN_ENTRY) else (lt, a, b))
+        |> List.map (fun (lt, a:string, b:block) -> if a.Contains("假C") && b = UNKNOW then (lt, a, MAIN_ENTRY) else (lt, a, b))
+        |> List.map (fun (lt, a:string, b:block) -> if a.Contains("開閉") && b = UNKNOW then (lt, a, JUNK) else (lt, a, b))
 
+        |> merge_comp_block
     0 // return an integer exit code
