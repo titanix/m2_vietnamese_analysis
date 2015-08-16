@@ -56,6 +56,10 @@ namespace MCPhon
 
                 char finalChar = captures[1][captures[1].Length - 1];
                 finalConsonant = finalChar == 'g' ? "ng" : finalChar.ToString();
+                if ("aeiouy".Contains(finalConsonant))
+                {
+                    finalConsonant = "";
+                }
 
                 Debug.WriteLine("mcr: " + captures[0] + " " + captures[1]);
             }
