@@ -44,6 +44,7 @@ type block =
     | JUNK
     override x.ToString() = sprintf "%A" x
 
+// fusionne les blocs COMPOUND_LIST successifs en un seul COMPOUND_LIST
 let rec merge_comp_block block_list = 
     match block_list with
         | []             -> []
@@ -73,3 +74,5 @@ let main argv =
 
         |> merge_comp_block
     0 // return an integer exit code
+
+    // (MAIN_ENTRY+COMPOUND_LIST)+
