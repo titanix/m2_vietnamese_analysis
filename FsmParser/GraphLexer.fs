@@ -1,4 +1,4 @@
-# 1 "I:\Code Projects\Git\Automaton\FsmParser\GraphLexer.fsl"
+# 1 "GraphLexer.fsl"
  
 module GraphLexer
 
@@ -34,7 +34,7 @@ let punctuation_map =
 
 let mutable comment_buffer = ""
 
-# 37 "I:\Code Projects\Git\Automaton\FsmParser\GraphLexer.fs"
+# 37 "GraphLexer.fs"
 let trans : uint16[] array = 
     [| 
     (* State 0 *)
@@ -179,88 +179,88 @@ and handle_comment  (lexbuf : Microsoft.FSharp.Text.Lexing.LexBuffer<_>) = _fsle
 and _fslex_tokenize  _fslex_state lexbuf =
   match _fslex_tables.Interpret(_fslex_state,lexbuf) with
   | 0 -> ( 
-# 54 "I:\Code Projects\Git\Automaton\FsmParser\GraphLexer.fsl"
+# 54 "GraphLexer.fsl"
                                   tokenize lexbuf 
-# 184 "I:\Code Projects\Git\Automaton\FsmParser\GraphLexer.fs"
+# 184 "GraphLexer.fs"
           )
   | 1 -> ( 
-# 55 "I:\Code Projects\Git\Automaton\FsmParser\GraphLexer.fsl"
+# 55 "GraphLexer.fsl"
                                        tokenize lexbuf 
-# 189 "I:\Code Projects\Git\Automaton\FsmParser\GraphLexer.fs"
+# 189 "GraphLexer.fs"
           )
   | 2 -> ( 
-# 57 "I:\Code Projects\Git\Automaton\FsmParser\GraphLexer.fsl"
+# 57 "GraphLexer.fsl"
                                 NEW_LINE 
-# 194 "I:\Code Projects\Git\Automaton\FsmParser\GraphLexer.fs"
+# 194 "GraphLexer.fs"
           )
   | 3 -> ( 
-# 59 "I:\Code Projects\Git\Automaton\FsmParser\GraphLexer.fsl"
+# 59 "GraphLexer.fsl"
                                 LABEL 
-# 199 "I:\Code Projects\Git\Automaton\FsmParser\GraphLexer.fs"
+# 199 "GraphLexer.fs"
           )
   | 4 -> ( 
-# 60 "I:\Code Projects\Git\Automaton\FsmParser\GraphLexer.fsl"
+# 60 "GraphLexer.fsl"
                                 COLOR 
-# 204 "I:\Code Projects\Git\Automaton\FsmParser\GraphLexer.fs"
+# 204 "GraphLexer.fs"
           )
   | 5 -> ( 
-# 61 "I:\Code Projects\Git\Automaton\FsmParser\GraphLexer.fsl"
+# 61 "GraphLexer.fsl"
                                      match keyword_map.TryFind(lexeme lexbuf) with 
                                                      | Some(token) -> token
                                                      | _ -> IDENTIFIER(lexeme  lexbuf) 
-# 211 "I:\Code Projects\Git\Automaton\FsmParser\GraphLexer.fs"
+# 211 "GraphLexer.fs"
           )
   | 6 -> ( 
-# 64 "I:\Code Projects\Git\Automaton\FsmParser\GraphLexer.fsl"
+# 64 "GraphLexer.fsl"
                                 comment_buffer <- "" ; handle_comment lexbuf 
-# 216 "I:\Code Projects\Git\Automaton\FsmParser\GraphLexer.fs"
+# 216 "GraphLexer.fs"
           )
   | 7 -> ( 
-# 66 "I:\Code Projects\Git\Automaton\FsmParser\GraphLexer.fsl"
+# 66 "GraphLexer.fsl"
                                    QUOC_LETTER(lexeme lexbuf) 
-# 221 "I:\Code Projects\Git\Automaton\FsmParser\GraphLexer.fs"
+# 221 "GraphLexer.fs"
           )
   | 8 -> ( 
-# 67 "I:\Code Projects\Git\Automaton\FsmParser\GraphLexer.fsl"
+# 67 "GraphLexer.fsl"
                                   IDENTIFIER(lexeme lexbuf) 
-# 226 "I:\Code Projects\Git\Automaton\FsmParser\GraphLexer.fs"
+# 226 "GraphLexer.fs"
           )
   | 9 -> ( 
-# 68 "I:\Code Projects\Git\Automaton\FsmParser\GraphLexer.fsl"
+# 68 "GraphLexer.fsl"
                                ARROW 
-# 231 "I:\Code Projects\Git\Automaton\FsmParser\GraphLexer.fs"
+# 231 "GraphLexer.fs"
           )
   | 10 -> ( 
-# 70 "I:\Code Projects\Git\Automaton\FsmParser\GraphLexer.fsl"
+# 70 "GraphLexer.fsl"
                                QUOTE 
-# 236 "I:\Code Projects\Git\Automaton\FsmParser\GraphLexer.fs"
+# 236 "GraphLexer.fs"
           )
   | 11 -> ( 
-# 71 "I:\Code Projects\Git\Automaton\FsmParser\GraphLexer.fsl"
+# 71 "GraphLexer.fsl"
                                    match punctuation_map.TryFind(lexeme lexbuf) with 
                                                      | Some(token) -> token
                                                      | _ -> IDENTIFIER(lexeme lexbuf) 
-# 243 "I:\Code Projects\Git\Automaton\FsmParser\GraphLexer.fs"
+# 243 "GraphLexer.fs"
           )
   | 12 -> ( 
-# 75 "I:\Code Projects\Git\Automaton\FsmParser\GraphLexer.fsl"
+# 75 "GraphLexer.fsl"
                               EOF 
-# 248 "I:\Code Projects\Git\Automaton\FsmParser\GraphLexer.fs"
+# 248 "GraphLexer.fs"
           )
   | _ -> failwith "tokenize"
 (* Rule handle_comment *)
 and _fslex_handle_comment  _fslex_state lexbuf =
   match _fslex_tables.Interpret(_fslex_state,lexbuf) with
   | 0 -> ( 
-# 78 "I:\Code Projects\Git\Automaton\FsmParser\GraphLexer.fsl"
+# 78 "GraphLexer.fsl"
                                 COMMENT(comment_buffer) 
-# 257 "I:\Code Projects\Git\Automaton\FsmParser\GraphLexer.fs"
+# 257 "GraphLexer.fs"
           )
   | 1 -> ( 
-# 79 "I:\Code Projects\Git\Automaton\FsmParser\GraphLexer.fsl"
+# 79 "GraphLexer.fsl"
                             comment_buffer <- comment_buffer + (lexeme lexbuf) ; handle_comment lexbuf 
-# 262 "I:\Code Projects\Git\Automaton\FsmParser\GraphLexer.fs"
+# 262 "GraphLexer.fs"
           )
   | _ -> failwith "handle_comment"
 
-# 3000000 "I:\Code Projects\Git\Automaton\FsmParser\GraphLexer.fs"
+# 3000000 "GraphLexer.fs"
