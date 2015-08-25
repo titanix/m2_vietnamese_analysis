@@ -1,0 +1,74 @@
+﻿
+{
+module Phase10
+
+open System
+open Microsoft.FSharp.Text.Lexing
+
+let lexeme = LexBuffer<_>.LexemeString
+
+type token =
+    | TIRET of string
+    | UNCAP_WORD of string
+    | CAP_WORD of string
+    | NL
+    | EOF
+    | DOT
+    | COMMA
+    | PUNCT of string
+    | OPEN_PARENT
+    | CLOSE_PARENT
+    | FAKE_WORD of string
+    | STAR
+    | ISOLATED_O
+
+    | DEFAULT of string
+    override x.ToString() = match x with
+        | TIRET(_)      -> "T"
+        | UNCAP_WORD(_) -> "U"
+        | CAP_WORD(_)   -> "C"
+        | NL            -> "行"
+        | EOF           -> "終"
+        | DOT           -> "點"
+        | COMMA         -> "V"
+        | PUNCT(_)      -> "P"
+        | OPEN_PARENT   -> "開"
+        | CLOSE_PARENT  -> "閉"
+        | FAKE_WORD(_)  -> "假"
+        | STAR          -> "星"
+        | ISOLATED_O    -> "O"
+
+}
+
+let ascii_alphabet	= ['a'-'z']
+let ascii_caps		= ['A'-'Z']
+let fr_alphabet		= ['a'-'z' 'à' 'â' 'æ' 'ç' 'é' 'è' 'ê' 'ë' 'î' 'ï' 'ô' 'œ' 'ù' 'û' 'ü' 'ÿ']
+let fr_accent_caps	= [ 'À' 'Â' 'Æ' 'Ç' 'É' 'È' 'Ê' 'Ë' 'Î' 'Ï' 'Ô' 'Œ' 'Ù' 'Û' 'Ü' 'Ÿ' ]
+let tiret			= [ '—' '-' '_' ]
+let trash			= ['+' '0'-'9']
+let newline			= "\n\r" | '\n' | '\r'
+let punctuation		= [':' ';' '\'' '’' '!' '?']
+let ignore			= ' '
+let	fake_word		= [ 'ä' 'ﬁ' 'ﬂ' '[' ']' '{' '}' '“' '”' '"' '‘' '\\' '/' '«' '»' ]
+let fr_full			= fr_alphabet | fr_accent_caps | ascii_caps
+
+let capitalized		= (ascii_caps | fr_accent_caps) fr_full*
+let uncapitalized	= fr_alphabet+
+let no_fr			= fr_full* fake_word fr_full*
+
+rule tokenize = parse
+	| 'o' | 'O' | '0'	{ ISOLATED_O }
+	| tiret				{ TIRET (lexeme lexbuf) }
+	| capitalized		{ CAP_WORD (lexeme lexbuf) }
+	| uncapitalized		{ UNCAP_WORD (lexeme lexbuf) }
+	| eof				{ EOF }
+	| newline			{ NL }
+	| trash	| ignore	{ tokenize lexbuf }
+	| ','				{ COMMA }
+	| '.'				{ DOT }
+	| '('				{ OPEN_PARENT }
+	| ')'				{ CLOSE_PARENT }
+	| '*'				{ STAR }
+	| punctuation		{ PUNCT (lexeme lexbuf) }
+	| no_fr				{ FAKE_WORD (lexeme lexbuf) }
+//	| _					{ DEFAULT (lexeme lexbuf) }
