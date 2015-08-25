@@ -25,7 +25,7 @@ let print_result (table: (string * string * char) list) =
 
 let rec indent (str, depth) = if depth <= 0 then str else indent("\t" + str, depth - 1)
 
-let create_fsm_file (table: (string * string * char) list, outfile_path:string) =
+let create_fsm_file (table: (string * string * char) list, outfile_path:string, generate_warnings:bool) =
     let final_state_name = "__END"
     let method_suffix_name = "FunctionHandler"
     let alphabet = ['a'; 'b'; 'c'; 'd'; 'e' ; 'g'; 'h'; 'i'; 'k'; 'l'; 'm'; 'n'; 'o'; 'p'; 'q'; 'r'; 's'; 't'; 'u';
@@ -38,8 +38,10 @@ let create_fsm_file (table: (string * string * char) list, outfile_path:string) 
             indent(String.Format("{0}{1}();\n", key, method_suffix_name), 3),
             indent("yield return null;\n", 3), 
             String.Concat(Seq.map (fun (_, n, t) -> String.Format(indent("if(actionParameter == '{0}') goto {1};\n", 3), t, n)) value),
-            String.Concat(Set.map (fun x -> indent(String.Format("#warning missing transition for symbol {0}\n", x), 3)) 
-                (Set.difference alphabet (Set.ofSeq (Seq.map (fun (_, _, t) -> t) value)))),
+            (if generate_warnings then 
+                String.Concat(Set.map (fun x -> indent(String.Format("#warning missing transition for symbol {0}\n", x), 3)) 
+                  (Set.difference alphabet (Set.ofSeq (Seq.map (fun (_, _, t) -> t) value)))) 
+            else String.Empty),
             indent(String.Format("defaultTransitionReached = \"{0}\";\n", key), 3),
             indent(String.Format("goto {0};\n", final_state_name), 3)))
         |> String.Concat
@@ -97,6 +99,6 @@ let main argv =
     match argv with
     | [| graph_path ; out_path |] -> parse graph_path |> ignore
                                      let tr_table = GraphParser.tr_table |> List.ofSeq
-                                     create_fsm_file (tr_table, out_path) |> ignore
+                                     create_fsm_file (tr_table, out_path, false) |> ignore
                                      0
     | _ -> 1
