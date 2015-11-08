@@ -23,7 +23,7 @@ namespace VietSyllableTransducer
             { "m", "M" },
             { "n", "N" },
             { "ph", "F" },
-            { "qu", "K" }, // ?
+            { "qu", "K" },
             { "s", "X" },
             { "x", "X" },
             { "t", "T" },
@@ -34,7 +34,8 @@ namespace VietSyllableTransducer
             { "tr", "T" },
             { "ngh", "Ñ" },
             { "nh", "N" },
-            { "ch", "Č" }, // ?
+            // BUG : c'est probablement vrai pour le MC mais FAUX pour le viet -> /K/
+            { "ch", "Č" },
 
             // finale
             { "i", "Y" },

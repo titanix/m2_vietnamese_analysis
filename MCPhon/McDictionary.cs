@@ -7,7 +7,7 @@ using System.Diagnostics;
 namespace MCPhon
 {
     /// <summary>
-    /// Cette classe implmémente un dicitonnaire qui associe à un caractère chinois (char) un objet McReconstruction.
+    /// Cette classe implmémente un dictionnaire qui associe à un caractère chinois (char) un objet McReconstruction.
     /// </summary>
     public class McDictionary
     {
