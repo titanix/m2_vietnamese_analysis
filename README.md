@@ -1,54 +1,19 @@
-YieldMachine
-============
-Inline state machines in C#
+Code d'analyse d'une syllabe vietnamienne
+=========================================
+
+Project Structure:
+* FsmParser
+Permet de générer une partie de l'implémentation d'un automate à partir de son fichier .dot.
+Sert à générer VietSyllableTransducer\VstPartial.cs à partir de VietPhon\Data\graph.dot.
+
+* MCPhon
+Permet d'extraire le contenu du champ MC (Middle Chinese) du fichier baxter.txt et de le renvoyer sous forme d'objet typé.
+
+* VietPhon
 
 
-C# contains a state machine generator, used solely to support the `yield return` statement. How about we use it for, well, state machines?
+* VietSyllableTransducer
+Implémentation du transducer d'analyse d'une syllabe vietnamienne et point d'entrée pour la tester.
 
-For example, the code below runs the following state machine:
-
-![Lamp state machine](http://e.teeselink.nl/gvrender/?dotfile=https://raw.github.com/eteeselink/YieldMachine/master/LampExample/lampExample.gv)
-
-Note that this state machine has 2 triggers and 3 states. In code, a state becomes a `goto` label, and a trigger becomes a property or field of type `Action`, decorated with the `Trigger` attribute:
-
-```C#
-    public class Lamp : StateMachine
-    {
-        // Triggers (or events, or actions, whatever) that your state machine understands.
-        [Trigger]
-        public readonly Action PressSwitch;
-
-        [Trigger]
-        public readonly Action GotError;
-
-        // Actual state machine logic
-        protected override IEnumerable WalkStates()
-        {
-        off:                                       // Each goto label is a state
-            Console.WriteLine("off.");             // State entry actions
-            yield return null;                     // Wait until a trigger is called
-                                                   // Ah, a trigger was called! 
-                                                   //   perform state exit actions (none, in this case)
-            if (Trigger == PressSwitch) goto on;   // Transitions go here: depending on the trigger that was called,
-                                                   //   go to the right state
-            InvalidTrigger();                      // Throw exception on invalid trigger
-
-        on:
-            Console.WriteLine("*shiiine!*");
-            yield return null;
-
-            if (Trigger == GotError) goto error;
-            if (Trigger == PressSwitch) goto off;
-            InvalidTrigger();
-
-        error:
-            Console.WriteLine("-err-");
-            yield return null;
-
-            if (Trigger == PressSwitch) goto off;
-            InvalidTrigger();
-        }
-    }
-```
-
-The `[Trigger]` fields are automatically assigned action objects upon construction. These action objects, when called, set the base class's `Trigger` property to the action that was called, and then moves the state machine to the next state.
+* YieldMachine
+Classe de base pour l'implémentation d'un automate.
