@@ -70,7 +70,9 @@
     <Compile Include="Phase_1.0.fs" />
     <Compile Include="Program.fs" />
     <None Include="Parse_1.0.fsy" />
-    <None Include="ocr1.txt" />
+    <Content Include="ocr1.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
   <ItemGroup>
     <Reference Include="FsLexYacc.Runtime">

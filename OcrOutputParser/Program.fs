@@ -61,13 +61,13 @@ let rec merge_comp_block block_list =
 [<EntryPoint>]
 let main argv = 
     //tokenize @"I:\Code Projects\Git\Automaton\OcrOutputParser\ocr1.txt"
-    let result = cb_helpers @"I:\Code Projects\Git\Automaton\OcrOutputParser\ocr1.txt"
+    let result = cb_helpers @"ocr1.txt"
     let block_list = List.map (fun x -> (x, (x |> List.map (fun a -> a.ToString()) |> String.Concat), UNKNOW)) result
     let modified_list = 
         block_list 
         |> List.map (fun (lt, a:string, b:block) -> if a.Contains("O") && b = UNKNOW then (lt, a, COMPOUND_LIST) else (lt, a, b))
         |> List.map (fun (lt, a:string, b:block) -> if a.Contains("星") && b = UNKNOW then (lt, a, MAIN_ENTRY) else (lt, a, b))
-        // ces règles doivent être appliquées après les deux premières, car son tmoins précises
+        // ces règles doivent être appliquées après les deux premières, car sont moins précises
         |> List.map (fun (lt, a:string, b:block) -> if a.Contains("CC") && b = UNKNOW then (lt, a, MAIN_ENTRY) else (lt, a, b))
         |> List.map (fun (lt, a:string, b:block) -> if a.Contains("假C") && b = UNKNOW then (lt, a, MAIN_ENTRY) else (lt, a, b))
         |> List.map (fun (lt, a:string, b:block) -> if a.Contains("開閉") && b = UNKNOW then (lt, a, JUNK) else (lt, a, b))
